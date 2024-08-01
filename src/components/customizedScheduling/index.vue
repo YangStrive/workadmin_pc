@@ -5,16 +5,6 @@
         <router-link to="kqaddmin" replace>考勤管理</router-link>
         <router-link to="">排班</router-link>
       </breadcrumb>
-      <!-- <div class="breadcrumb">
-		   		<el-breadcrumb separator="/">
-					<el-breadcrumb-item :to="{ path: 'kqaddmin' }" replace>考勤管理</el-breadcrumb-item>
-					<el-breadcrumb-item :to="{ path: 'kqtasklist' }" replace>考勤规则设置</el-breadcrumb-item>
-					<el-breadcrumb-item>排班</el-breadcrumb-item>
-		   		</el-breadcrumb>
-  			</div> -->
-      <!-- <div class="kqpb_export" @click="exportDialog">
-  			    <h3><i class="export-icon"></i><span>导出</span></h3>
-  			</div> -->
       <div class="kqpb_export_date">
         <el-dialog title="导出" :visible.sync="showExport">
           <p class="des">导出时间范围不能超过一个月</p>
@@ -182,6 +172,7 @@
               :prop="index + ''"
               :label="new Date(a.date * 1000).getDate() + ''"
               min-width="101"
+              :class-name=" ((a.date * 1000) < new Date().getTime()) ? 'cell-disabled' : '' "
             >
               <template slot-scope="scope">
                 <div class="per_bc_day">
@@ -446,30 +437,37 @@ export default {
                 //     task_id: 0
                 // }
               ],
+              select_cell:false,
               date: "1500220800",
             },
             {
               schedule: [],
+              select_cell:false,
               date: "1500307200",
             },
             {
               schedule: [],
+              select_cell:false,
               date: "1500393600",
             },
             {
               schedule: [],
+              select_cell:false,
               date: "1500480000",
             },
             {
               schedule: [],
+              select_cell:false,
               date: "1500566400",
             },
             {
               schedule: [],
+              select_cell:false,
               date: "1500652800",
             },
             {
               schedule: [],
+              select_cell:false,
               date: "1500739200",
             },
           ],
@@ -1794,7 +1792,22 @@ export default {
         this.show_edit_tooltip = false;
       }
     },
-    cellClickFn1(row, column, cell, event) {
+
+    //新的点击单元格
+    cellClickFn1(row, column, cell, event){
+
+      event.stopPropagation();
+      let ms = $(cell);
+      console.log($(cell));
+      let classList = cell.className;
+      if(classList.indexOf('select-border') == -1){
+        $(cell).addClass('select-border');
+      }else{
+        $(cell).removeClass('select-border');
+      }
+    },
+
+    cellClickFn12(row, column, cell, event) {
       event.stopPropagation();
       console.log(row, column, cell,);
       this.show_bc_tooltip = false;

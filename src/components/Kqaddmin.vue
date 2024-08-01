@@ -5,6 +5,11 @@
         <div style="float:right;">
           <h3 v-show="kqdownload1 && !groupLeaderFlag" class="kq-export" @click="exportDialog">
             <i class="export-icon"></i>
+          <router-link to="customizedScheduling" style="color:#6699ee;font-weight:normal;font-size:13px;line-height: 1;"
+            class="kaaddminset">排班管理</router-link>
+          </h3>
+          <h3 v-show="kqdownload1 && !groupLeaderFlag" class="kq-export" @click="exportDialog">
+            <i class="export-icon"></i>
             <span>导出报表</span>
           </h3>
           <h3 v-show="kqdownload2" class="kq-export kqdownload2">

@@ -377,6 +377,12 @@ export default new Router({
 					name: 'OutgoingManagement',
 					component: (resolve) => require(['@/components/OutgoingManagement'], resolve)
 				},
+				//新版打卡
+				{
+					path:'customizedScheduling',
+					name:'customizedScheduling',
+					component:(resolve) => require(['@/components/customizedScheduling'], resolve)
+				},
 			]
 		},
 		{

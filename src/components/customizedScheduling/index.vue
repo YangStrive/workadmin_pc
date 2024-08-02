@@ -3,8 +3,19 @@
     <div class="kqeditpb_top">
       <breadcrumb>
         <router-link to="kqaddmin" replace>考勤管理</router-link>
+        <router-link to="kqtasklist" replace>考勤规则管理</router-link>
         <router-link to="">排班</router-link>
       </breadcrumb>
+      <!-- <div class="breadcrumb">
+		   		<el-breadcrumb separator="/">
+					<el-breadcrumb-item :to="{ path: 'kqaddmin' }" replace>考勤管理</el-breadcrumb-item>
+					<el-breadcrumb-item :to="{ path: 'kqtasklist' }" replace>考勤规则设置</el-breadcrumb-item>
+					<el-breadcrumb-item>排班</el-breadcrumb-item>
+		   		</el-breadcrumb>
+  			</div> -->
+      <!-- <div class="kqpb_export" @click="exportDialog">
+  			    <h3><i class="export-icon"></i><span>导出</span></h3>
+  			</div> -->
       <div class="kqpb_export_date">
         <el-dialog title="导出" :visible.sync="showExport">
           <p class="des">导出时间范围不能超过一个月</p>
@@ -79,7 +90,7 @@
       <div class="bc_explain">
         <div class="t">班次说明</div>
         <div class="bcs">
-          <div class="bc_item" v-for="item in bc_list">
+          <div class="bc_item" v-for="item in workScheduleList">
             <div class="colorbox"></div>
             <span class="bc_time"
               >{{ item.name }} {{ item.start_time }}-{{
@@ -160,19 +171,18 @@
       <div class="pb_edit_table">
         <el-table
           border
-          @cell-click="cellClickFn1"
-          @header-click="oneDayAll"
-          :data="pb_list"
+          @cell-click="handleCellClick"
+          @header-click="handleHeaderClick"
+          :data="schedulingList"
           style="width: 100%"
         >
           <el-table-column prop="user_name" label="姓名" width="80">
           </el-table-column>
-          <template v-for="(a, index) in pb_list[0].date_schedule">
+          <template v-for="(a, index) in schedulingList[0].date_schedule">
             <el-table-column
               :prop="index + ''"
               :label="new Date(a.date * 1000).getDate() + ''"
               min-width="101"
-              :class-name=" ((a.date * 1000) < new Date().getTime()) ? 'cell-disabled' : '' "
             >
               <template slot-scope="scope">
                 <div class="per_bc_day">
@@ -190,17 +200,17 @@
         </el-table>
         <!-- 分页 -->
         <div class="pagination_wrap">
-          <div class="pagination" v-show="all_list.length">
+          <div class="pagination" v-show="sourceSchedulingList.length">
             <el-pagination
               @current-change="handleCurrentChange"
               :current-page.sync="currentPage"
               :page-size="10"
               layout="prev, pager, next"
-              :total="all_list.length"
+              :total="sourceSchedulingList.length"
             >
             </el-pagination>
           </div>
-          <div class="total_num">共{{ all_list.length }}人</div>
+          <div class="total_num">共{{ sourceSchedulingList.length }}人</div>
         </div>
         <!-- 弹窗内容 -->
         <div class="pb_tooltip" v-show="show_edit_tooltip" @click.stop>
@@ -282,7 +292,7 @@
                   </div>
                 </template>
               </el-table-column>
-              <template v-for="(a, index) in pb_list[0].date_schedule">
+              <template v-for="(a, index) in schedulingList[0].date_schedule">
                 <el-table-column
                   :prop="'' + index"
                   :label="new Date(a.date * 1000).getDate() + ''"
@@ -332,7 +342,7 @@
                 min-width="152"
               >
               </el-table-column>
-              <template v-for="(a, index) in pb_list[0].date_schedule">
+              <template v-for="(a, index) in schedulingList[0].date_schedule">
                 <el-table-column
                   :prop="'' + index"
                   :label="new Date(a.date * 1000).getDate() + ''"
@@ -383,7 +393,7 @@ import SelectMemberGroupMulti from "@/components/common/SelectMemberGroupMulti";
 import breadcrumb from "@/components/common/breadcrumb";
 
 export default {
-  name: "customizedScheduling",
+  name: "kqeditpb",
   components: {
     SelectMemberGroupMulti,
     breadcrumb,
@@ -410,7 +420,7 @@ export default {
       load_end: false,
       showExport: false,
       // 所有班次
-      bc_list: [
+      workScheduleList: [
         //  			{
         // end_time: "18:30",
         //                id: "82",
@@ -421,9 +431,9 @@ export default {
       bc_list_active: [], //操作时
       bc_list_del: [], //删除的班次
       // 所有人的排班情况
-      all_list: [],
+      sourceSchedulingList: [],
       //当前展示的排班情况
-      pb_list: [
+      schedulingList: [
         {
           user_id: 0,
           user_name: "",
@@ -437,37 +447,30 @@ export default {
                 //     task_id: 0
                 // }
               ],
-              select_cell:false,
               date: "1500220800",
             },
             {
               schedule: [],
-              select_cell:false,
               date: "1500307200",
             },
             {
               schedule: [],
-              select_cell:false,
               date: "1500393600",
             },
             {
               schedule: [],
-              select_cell:false,
               date: "1500480000",
             },
             {
               schedule: [],
-              select_cell:false,
               date: "1500566400",
             },
             {
               schedule: [],
-              select_cell:false,
               date: "1500652800",
             },
             {
               schedule: [],
-              select_cell:false,
               date: "1500739200",
             },
           ],
@@ -640,7 +643,7 @@ export default {
     };
   },
   methods: {
-    tj_addr1() {
+    statisticsAddr() {
       setTimeout(() => {
         let tj_addr = [];
         if (this.all_addr.length) {
@@ -650,11 +653,11 @@ export default {
             tempObj1.addr_id = obj1.workplace_id;
             tempObj1.index = addr_index;
             tempObj1.addr_date = [];
-            this.all_list[0].date_schedule.forEach((obj2, index) => {
+            this.sourceSchedulingList[0].date_schedule.forEach((obj2, index) => {
               let tempObj2 = {};
               tempObj2.date = obj2.date;
               tempObj2.pers = [];
-              this.all_list.forEach((obj3) => {
+              this.sourceSchedulingList.forEach((obj3) => {
                 let tempObj3 = {};
                 if (
                   obj3.date_schedule[index].schedule.length &&
@@ -811,7 +814,9 @@ export default {
         }
       }, 0);
     },
-    tj_bc1() {
+
+    //统计排班信息
+    statisticsScheduling() {
       setTimeout(() => {
         let banci = [];
         for (let i = 0; i < 10; i++) {
@@ -820,19 +825,19 @@ export default {
         }
         const b = [...banci, ...banci, ...banci];
         let tj_bc = [];
-        console.log("eeeefffffffffffffffffffffffffff", this.bc_list);
-        this.bc_list.forEach((obj1, bc_index) => {
+        console.log("eeeefffffffffffffffffffffffffff", this.workScheduleList);
+        this.workScheduleList.forEach((obj1, bc_index) => {
           let tempObj1 = {};
           tempObj1.bc_name = obj1.name;
           tempObj1.bc_style = b[bc_index];
           tempObj1.bc_id = obj1.id;
           tempObj1.index = bc_index;
           tempObj1.bc_date = [];
-          this.all_list[0].date_schedule.forEach((obj2, index) => {
+          this.sourceSchedulingList[0].date_schedule.forEach((obj2, index) => {
             let tempObj2 = {};
             tempObj2.date = obj2.date;
             tempObj2.pers = [];
-            this.all_list.forEach((obj3) => {
+            this.sourceSchedulingList.forEach((obj3) => {
               let tempObj3 = {};
               obj3.date_schedule[index].schedule.forEach((obj4, i) => {
                 if (obj4.schedule_id == obj1.id) {
@@ -858,24 +863,24 @@ export default {
         this.tj_bc = tj_bc;
       }, 0);
     },
-
     init() {
-      $(".customized-scheduling").height($(window).height() - 60);
+      $(".kqeditpb").height($(window).height() - 60);
       //获取用户信息
       this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
       this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
       this.task_id = util.getLocalStorage("kqpb_task_id");
 
       let week_day = new Date().getDay();
-      let sun = util.getLocalTime(
+
+      //获取当前周的周一日期
+      let currentDate = util.getLocalTime(
         new Date().getTime() -
           (week_day == 0 ? 6 : week_day - 1) * 24 * 60 * 60 * 1000,
         "yyyy-MM-dd"
       );
-      // console.log(sun)
-      this.start_date = sun;
+      this.start_date = currentDate;
       //获取班次信息
-      this.getBcList();
+      this.getWorkScheduleList();
       //获取权限信息
       this.getPermission();
 
@@ -895,7 +900,6 @@ export default {
       //获取所有人的所有考勤地点
       // this.getAllAddr()
     },
-
     getMemberGroup() {
       //获取可选择小组和人员列表
       util.ajax({
@@ -943,7 +947,7 @@ export default {
       });
       this.group_ids = group_ids.join(",");
       this.user_ids = user_ids.join(",");
-      this.getAllList();
+      this.getAllSchedulingList();
     },
     computedMemberGroup() {
       let members = 0,
@@ -999,16 +1003,9 @@ export default {
         },
       });
     },
+
+    //获取所有人的工作地点
     getAllAddr() {
-      // console.log('所有人的所有地点1111入参')
-      // console.log({
-      //     team_id: this.team_id,
-      //     project_id: this.project_id,
-      //     task_id: this.task_id,
-      //     // start_date: this.start_date,
-      //     group_ids:this.group_ids,
-      //     user_ids:this.user_ids
-      // })
       util.ajax({
         url: "/attendance/user_position_batch",
         type: "GET",
@@ -1016,7 +1013,6 @@ export default {
           team_id: this.team_id,
           project_id: this.project_id,
           task_id: this.task_id,
-          // start_date: this.start_date,
           group_ids: this.group_ids,
           user_ids: this.user_ids,
         },
@@ -1034,7 +1030,7 @@ export default {
                 },
               ];
             }
-            this.tj_addr1();
+            this.statisticsAddr();
           } else {
             this.$message({
               showClose: true,
@@ -1089,12 +1085,9 @@ export default {
         },
       });
     },
-    getBcList() {
-      // console.log({
-      //         team_id: this.team_id,
-      //         project_id: this.project_id,
-      //         task_id: this.task_id
-      //     })
+
+    //获取所有设置的班次列表
+    getWorkScheduleList() {
       util.ajax({
         url: "/attendance/task_schedule",
         type: "GET",
@@ -1105,12 +1098,11 @@ export default {
         },
         success: (res) => {
           console.log("所有班次");
-          console.log(res);
           if (res && res.errno == 0) {
-            this.bc_list = res.data;
+            this.workScheduleList = res.data;
 
             //获取所有人的排班信息
-            this.getAllList();
+            this.getAllSchedulingList(); 
           } else {
             this.$message({
               showClose: true,
@@ -1130,16 +1122,8 @@ export default {
         },
       });
     },
-    getAllList() {
-      console.log("全部排班参数");
-      console.log({
-        team_id: this.team_id,
-        project_id: this.project_id,
-        task_id: this.task_id,
-        start_date: this.start_date,
-        group_ids: this.group_ids,
-        user_ids: this.user_ids,
-      });
+    //获取所有人的排班信息
+    getAllSchedulingList() {
       // return
       this.load_end = false;
       util.ajax({
@@ -1154,66 +1138,41 @@ export default {
           user_ids: this.user_ids,
         },
         success: (res) => {
-          console.log("所有人的排班情况");
-          console.log(res);
-
           if (res && res.errno == 0) {
             this.load_end = true;
+
+            //如果没有返回数据  自己设置假数据
             if (!res.data.length) {
-              this.all_list = this.pb_list = [
+              let scheduleList = [];
+              let i = 0;
+              while(i < 7 ) {
+                scheduleList.push({
+                  schedule: [],
+                  date:'',
+                });
+                i++;
+              }
+
+              this.sourceSchedulingList = this.schedulingList = [
                 {
                   user_id: 0,
                   user_name: "",
-                  date_schedule: [
-                    {
-                      schedule: [
-                        // {
-                        //     position_id: 0,
-                        //     schedule_id: 0,
-                        //     schedule_name: "A",
-                        //     task_id: 0
-                        // }
-                      ],
-                      date: "1500220800",
-                    },
-                    {
-                      schedule: [],
-                      date: "1500307200",
-                    },
-                    {
-                      schedule: [],
-                      date: "1500393600",
-                    },
-                    {
-                      schedule: [],
-                      date: "1500480000",
-                    },
-                    {
-                      schedule: [],
-                      date: "1500566400",
-                    },
-                    {
-                      schedule: [],
-                      date: "1500652800",
-                    },
-                    {
-                      schedule: [],
-                      date: "1500739200",
-                    },
-                  ],
+                  date_schedule: scheduleList,
                 },
               ];
+
               //没有返回数据  自己设置假数据
               let week_day = new Date().getDay();
-              this.pb_list[0].date_schedule.forEach((obj, index) => {
+              //获取当前周的周一到周日时间戳
+              this.schedulingList[0].date_schedule.forEach((obj, index) => {
                 obj.date =
                   (new Date().getTime() -
                     24 * 60 * 60 * 1000 * (week_day - index - 1)) /
                   1000;
               });
             } else {
-              this.all_list = res.data;
-              this.all_list.forEach((obj, index) => {
+              let sourceSchedulingList = res.data;
+              sourceSchedulingList.forEach((obj, index) => {
                 obj.index = index;
               });
               let banci = [];
@@ -1222,23 +1181,26 @@ export default {
                 banci.push(String.fromCharCode(65 + i));
               }
               const b = [...banci, ...banci, ...banci];
-              this.all_list.forEach((obj, index) => {
-                this.all_list[0].date_schedule.forEach((obj1, index1) => {
+              sourceSchedulingList.forEach((obj, index) => {
+                sourceSchedulingList[0].date_schedule.forEach((obj1, index1) => {
                   obj.date_schedule[index1].schedule.forEach((obj1, index2) => {
                     obj1.style = b[index2];
                   });
                 });
               });
-              this.pb_list = this.all_list.slice(0, 10);
+
+              this.sourceSchedulingList = sourceSchedulingList;
+              this.schedulingList = this.sourceSchedulingList.slice(0, 10);
+              
             }
-            console.log("pb_listpb_listpb_listpb_listpb_list", this.pb_list);
-            this.tj_bc1();
+
+            this.statisticsScheduling();
             this.getAllAddr();
 
-            // this.tj_addr1()
+            // this.statisticsAddr()
             //设置过期的表格
             setTimeout(() => {
-              this.pb_list[0].date_schedule.forEach((obj, index) => {
+              this.schedulingList[0].date_schedule.forEach((obj, index) => {
                 if (
                   util.getLocalTime(obj.date * 1000, "yyyy-MM-dd") <
                   util.getLocalTime(new Date().getTime(), "yyyy-MM-dd")
@@ -1255,7 +1217,7 @@ export default {
                     }
                   );
 
-                  if (index == this.pb_list[0].date_schedule.length - 1) {
+                  if (index == this.schedulingList[0].date_schedule.length - 1) {
                     $(".pb_edit_table .el-table__body-wrapper tr").each(
                       function () {
                         $(this).find("td").eq(0).addClass("disabled_style");
@@ -1275,7 +1237,7 @@ export default {
                     }
                   );
 
-                  if (index == this.pb_list[0].date_schedule.length - 1) {
+                  if (index == this.schedulingList[0].date_schedule.length - 1) {
                     $(".pb_edit_table .el-table__body-wrapper tr").each(
                       function () {
                         $(this).find("td").eq(0).removeClass("disabled_style");
@@ -1311,9 +1273,10 @@ export default {
         },
       });
     },
+
     setDisabledTable() {
       setTimeout(() => {
-        this.pb_list[0].date_schedule.forEach((obj, index) => {
+        this.schedulingList[0].date_schedule.forEach((obj, index) => {
           if (
             util.getLocalTime(obj.date * 1000, "yyyy-MM-dd") <
             util.getLocalTime(new Date().getTime(), "yyyy-MM-dd")
@@ -1328,7 +1291,7 @@ export default {
                 .addClass("disabled_style");
             });
 
-            if (index == this.pb_list[0].date_schedule.length - 1) {
+            if (index == this.schedulingList[0].date_schedule.length - 1) {
               $(".pb_edit_table .el-table__body-wrapper tr").each(function () {
                 $(this).find("td").eq(0).addClass("disabled_style");
               });
@@ -1344,7 +1307,7 @@ export default {
                 .removeClass("disabled_style");
             });
 
-            if (index == this.pb_list[0].date_schedule.length - 1) {
+            if (index == this.schedulingList[0].date_schedule.length - 1) {
               $(".pb_edit_table .el-table__body-wrapper tr").each(function () {
                 $(this).find("td").eq(0).removeClass("disabled_style");
               });
@@ -1359,7 +1322,7 @@ export default {
         cancelButtonText: "取消",
       })
         .then(() => {
-          this.getAllList();
+          this.getAllSchedulingList();
         })
         .catch(() => {
           // this.$message({
@@ -1372,7 +1335,7 @@ export default {
       //设置表头格式
       setTimeout(() => {
         let Dom_div = "";
-        this.pb_list[0].date_schedule.forEach((obj, index) => {
+        this.schedulingList[0].date_schedule.forEach((obj, index) => {
           // console.log(new Date(obj.date/1).getDay())
           switch (new Date(obj.date * 1000).getDay()) {
             case 0:
@@ -1444,7 +1407,7 @@ export default {
         "yyyy-MM-dd"
       );
       // console.log(this.start_date+'~'+this.end_date)
-      this.getAllList();
+      this.getAllSchedulingList();
     },
     exportDialog() {
       this.showExport = true;
@@ -1551,7 +1514,7 @@ export default {
     },
     savePb() {
       let date_schedule = [];
-      this.all_list.forEach((obj1) => {
+      this.sourceSchedulingList.forEach((obj1) => {
         obj1.date_schedule.forEach((obj2) => {
           if (obj2.changed == 1) {
             let tempObj = {};
@@ -1604,7 +1567,7 @@ export default {
                   type: "success",
                 });
 
-                this.all_list.forEach((obj1) => {
+                this.sourceSchedulingList.forEach((obj1) => {
                   obj1.date_schedule.forEach((obj2) => {
                     obj2.changed = 0;
                   });
@@ -1643,6 +1606,7 @@ export default {
         banci.push(String.fromCharCode(65 + i));
       }
       const b = [...banci, ...banci, ...banci];
+      debugger
       let tempArr = [];
       this.sel_bc_addr.schedule.forEach((obj, index) => {
         if (obj.selected == 1) {
@@ -1662,7 +1626,7 @@ export default {
       });
       if (this.sel_bc_addr.isAllDay == 1) {
         // console.log(this.sel_bc_addr)
-        this.all_list[
+        this.sourceSchedulingList[
           this.sel_bc_addr.data_coordinate[0]
         ].date_schedule.forEach((obj) => {
           if (
@@ -1674,35 +1638,36 @@ export default {
           }
         });
       } else if (this.sel_bc_addr.isAllPer == 1) {
-        this.all_list.forEach((obj) => {
+        this.sourceSchedulingList.forEach((obj) => {
           obj.date_schedule[this.sel_bc_addr.data_coordinate[1]].schedule =
             tempArr;
           obj.date_schedule[this.sel_bc_addr.data_coordinate[1]].changed = 1;
         });
       } else {
-        this.all_list[this.sel_bc_addr.data_coordinate[0]].date_schedule[
+        this.sourceSchedulingList[this.sel_bc_addr.data_coordinate[0]].date_schedule[
           this.sel_bc_addr.data_coordinate[1]
         ].schedule = tempArr;
-        this.all_list[this.sel_bc_addr.data_coordinate[0]].date_schedule[
+        this.sourceSchedulingList[this.sel_bc_addr.data_coordinate[0]].date_schedule[
           this.sel_bc_addr.data_coordinate[1]
         ].changed = 1;
       }
 
-      // console.log(this.all_list)
+      // console.log(this.sourceSchedulingList)
       this.show_edit_tooltip = false;
       $(".el-table__body-wrapper td + td .cell").css({
         border: "1px solid transparent",
       });
 
       // if(this.tj_type_sel == 0){
-      this.tj_bc1();
+      this.statisticsScheduling();
       // }else{
-      this.tj_addr1();
+      this.statisticsAddr();
       // }
     },
+
     //点击表头 设置当天所有人
-    oneDayAll(column, event) {
-      if (!this.all_list.length) return;
+    handleHeaderClick(column, event) {
+      if (!this.sourceSchedulingList.length) return;
       event.stopPropagation();
       this.show_bc_tooltip = false;
       this.show_addr_tooltip = false;
@@ -1776,7 +1741,7 @@ export default {
         const b = [...banci, ...banci, ...banci];
         this.sel_bc_addr.schedule = [];
         this.sel_bc_addr.title = "修改所有员工当天班次：";
-        this.bc_list.forEach((obj1, index) => {
+        this.workScheduleList.forEach((obj1, index) => {
           let tempobj = JSON.parse(JSON.stringify(obj1));
           tempobj.selected = 0;
           tempobj.style = b[index];
@@ -1793,31 +1758,24 @@ export default {
       }
     },
 
-    //新的点击单元格
-    cellClickFn1(row, column, cell, event){
+    handleCellClick2(row, column, cell, event){
+      event.stopPropagation(); 
 
-      event.stopPropagation();
-      let ms = $(cell);
-      console.log($(cell));
-      let classList = cell.className;
-      if(classList.indexOf('select-border') == -1){
-        $(cell).addClass('select-border');
-      }else{
-        $(cell).removeClass('select-border');
+      if($(cell).hasClass("disabled_style") || row.user_id == 0) return;
+
+      if ($(cell).find(".per_bc_day").length && !$(cell).find(".per_bc_day").children().length) {
+        $(cell).find(".cell").css({ border: "1px solid #6699ee" });
       }
     },
 
-    cellClickFn12(row, column, cell, event) {
+    //点击表格单元格
+    handleCellClick(row, column, cell, event) {
       event.stopPropagation();
-      console.log(row, column, cell,);
       this.show_bc_tooltip = false;
       this.show_addr_tooltip = false;
       //如果请求数据失败 会有默认一行空表格 如点击则取消行为
       if (row.user_id == 0) return;
-      // 去掉所有边框
-      $(".el-table__body-wrapper td + td .cell").css({
-        border: "1px solid transparent",
-      });
+
       if (!$(cell).hasClass("disabled_style")) {
         //是空单元格 没有排班 单元格加边框
         if (
@@ -1908,7 +1866,7 @@ export default {
         if (column.property === "user_name") {
           //点击的是人名列
           this.sel_bc_addr.title = "修改员工一周班次：";
-          this.bc_list.forEach((obj1, index) => {
+          this.workScheduleList.forEach((obj1, index) => {
             let tempobj = JSON.parse(JSON.stringify(obj1));
             tempobj.selected = 0;
             tempobj.style = b[index];
@@ -1919,7 +1877,7 @@ export default {
           this.sel_bc_addr.data_coordinate = [row.index, -1];
         } else {
           this.sel_bc_addr.title = "修改员工当天班次：";
-          this.bc_list.forEach((obj1, index) => {
+          this.workScheduleList.forEach((obj1, index) => {
             let tempobj = JSON.parse(JSON.stringify(obj1));
             tempobj.selected = 0;
             tempobj.style = b[index];
@@ -1940,8 +1898,8 @@ export default {
     },
     //分页页码变化回调
     handleCurrentChange() {
-      // console.log(this.all_list.slice(this.currentPage*10-10,this.currentPage*10))
-      this.pb_list = this.all_list.slice(
+      // console.log(this.sourceSchedulingList.slice(this.currentPage*10-10,this.currentPage*10))
+      this.schedulingList = this.sourceSchedulingList.slice(
         this.currentPage * 10 - 10,
         this.currentPage * 10
       );
@@ -2080,7 +2038,7 @@ export default {
       }
     },
     openSetupBc() {
-      this.bc_list_active = JSON.parse(JSON.stringify(this.bc_list));
+      this.bc_list_active = JSON.parse(JSON.stringify(this.workScheduleList));
       this.bc_list_active.forEach((obj) => {
         obj.start_time = new Date(
           2017,
@@ -2099,29 +2057,10 @@ export default {
       });
     },
     startRange(end_time) {
-      // // console.log(end_time.toString().substr(16,8))
-      // // console.log(end_time.getTime())
-      // if(!end_time) return '00:00:00 - 23:59:59'
-      // // end_time = end_time.getTime() - 30*60*1000
-      // // return '00:00:00 - ' + util.getLocalTime(end_time,'HH:mm') + ':00'
-      // return [
-      //     '00:00:00 - ' + util.getLocalTime(end_time.getTime() - 60*1000,'HH:mm') + ':00',
-      //     util.getLocalTime(end_time.getTime() + 60*1000,'HH:mm') + ':00' + ' - 23:59:59'
-      // ]
     },
     endRange(start_time) {
-      // if(!start_time) return '00:00:00 - 23:59:59'
-      // // start_time = start_time.getTime() + 30*60*1000
-      // // return util.getLocalTime(start_time,'HH:mm') + ':00' + ' - 23:59:59'
-      // return [
-      //     '00:00:00 - ' + util.getLocalTime(start_time.getTime() - 60*1000,'HH:mm') + ':00',
-      //     util.getLocalTime(start_time.getTime() + 60*1000,'HH:mm') + ':00' + ' - 23:59:59'
-      // ]
     },
     formatEndtime(item) {
-      // console.log(item)
-      // console.log(item.start_time.toString().substr(16))
-      // console.log(item.end_time.toString().substr(16))
       if (
         item.start_time.toString().substr(16) <
         item.end_time.toString().substr(16)
@@ -2188,7 +2127,7 @@ export default {
                 // console.log('修改班次成功')
                 // console.log(res)
                 if (res && res.errno == 0) {
-                  this.bc_list = bc_list_active;
+                  this.workScheduleList = bc_list_active;
                   //修改班次成功后重新拉下班次信息
                   util.ajax({
                     url: "/attendance/task_schedule",
@@ -2202,7 +2141,7 @@ export default {
                       // console.log('所有班次')
                       // console.log(res)
                       if (res && res.errno == 0) {
-                        this.bc_list = res.data;
+                        this.workScheduleList = res.data;
                       } else {
                         this.$message({
                           showClose: true,
@@ -2312,7 +2251,7 @@ export default {
     },
     changeTjTypeSel() {
       if (this.tj_type_sel == 1 && !this.tj_addr.length) {
-        this.tj_addr1();
+        this.statisticsAddr();
       }
     },
     confirmExport() {
@@ -2355,4 +2294,3 @@ export default {
 };
 </script>
 <style src="./index.css"></style>
-

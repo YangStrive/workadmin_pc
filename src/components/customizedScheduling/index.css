@@ -226,10 +226,8 @@
   .el-pagination {
   padding: 0;
 }
-</style>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+
 .customized-scheduling {
   padding: 0 20px;
 }

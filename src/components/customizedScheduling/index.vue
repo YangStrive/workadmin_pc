@@ -391,10 +391,113 @@
     </div>
     <el-dialog
       title="排班"
+      size="tiny"
       :visible.sync="drawerVisibility"
       :before-close="handleDrawerBeforeClose">
       <div class="dialog-schedule-main">
-        
+        <el-tabs v-model="activeScheduleName" @tab-click="handleScheduleTabsClick">
+          <el-tab-pane label="固定班次" name="first"></el-tab-pane>
+          <el-tab-pane label="临时班次" name="second"></el-tab-pane>
+        </el-tabs>
+        <div class="schedule-box">
+          <div class="schedule-box-item" v-if="activeScheduleName == 'first'">
+            <div class="schedule-list-box">
+              <h3>当日班次</h3>
+              <ul class="schedule-list">
+                <li
+                  class="schedule-item"
+                  v-for="(item, index) in [{selected:1,style:'A',name:'A'}]"
+                  :key="index"
+                  @click="handleScheduleItemClick(item)"
+                >
+                  <div class="colorblock" :class="'colorblock_item_' + item.style"><p>{{ item.name }}</p></div>
+                  
+                </li>
+              </ul>
+
+            </div>
+            <div class="schedule-address"  v-if="personAllWorkAddr.length">
+              <h3>工作地点</h3>
+              <el-select
+                v-model="currentSchedulingData.position_id"
+                placeholder="请选择"
+                :clearable="true"
+              >
+                <el-option
+                  v-for="item in personAllWorkAddr"
+                  :key="item.workplace_id"
+                  :label="item.workplace_name"
+                  :value="item.workplace_id"
+                >
+                </el-option>
+              </el-select>
+            </div>
+          </div>
+          <div class="schedule-box-item" v-else>
+            <el-form  label-width="80px" :model="temporarySchedule">
+              <el-form-item label="工作时间">
+                <div class="work-time-picker" v-for="(item, index) in temporarySchedule.workTimeStartList" :key="index">
+                  <el-time-picker
+                    size="small"
+                    format="HH:mm"
+                    v-model="temporarySchedule.workTimeStartList[index].workTimeStart"
+                    :picker-options="{
+                      selectableRange: '18:30:00 - 20:30:00'
+                    }"
+                    placeholder="请选择">
+                  </el-time-picker>
+                  <span class="time-picker-c">至</span>  
+                  <el-time-picker
+                    size="small"
+                    format="HH:mm"
+                    v-model="temporarySchedule.workTimeStartList[index].workTimeEnd"
+                    :picker-options="{
+                      selectableRange: '18:30:00 - 20:30:00'
+                    }"
+                    placeholder="任意时间点">
+                  </el-time-picker>
+                  <div class="dialog-delete-btn" @click="handleDeleteWorkTime(index)" v-if="temporarySchedule.workTimeStartList.length > 1">
+                    <i class="el-icon-close" ></i>
+                  </div>
+                </div>
+                <el-button type="text" @click="handleAddWorkTime">添加</el-button>
+              </el-form-item>
+              <template v-if="temporarySchedule.workTimeStartList.length == 1">
+                <el-form-item label="休息时间">
+                  <el-radio class="radio" v-model="temporarySchedule.rest" label="1">启用</el-radio>
+                  <el-radio class="radio" v-model="temporarySchedule.rest" label="2">不起用</el-radio>
+                </el-form-item>
+                <el-form-item label="" v-if="temporarySchedule.rest == 1">   
+                  <div class="rest-time-picker">
+                    <el-time-picker
+                      size="small"
+                      format="HH:mm"
+                      v-model="temporarySchedule.restTimeStart"
+                      :picker-options="{
+                        selectableRange: '18:30:00 - 20:30:00'
+                      }"
+                      placeholder="任意时间点">
+                    </el-time-picker>
+                    <span class="time-picker-c">至</span> 
+                    <el-time-picker
+                      size="small"
+                      format="HH:mm"
+                      v-model="temporarySchedule.restTimeEnd"
+                      :picker-options="{
+                        selectableRange: '18:30:00 - 20:30:00'
+                      }"
+                      placeholder="任意时间点">
+                    </el-time-picker>
+                  </div>
+                </el-form-item>
+              </template>
+            </el-form>
+          </div>
+        </div>
+        <div class="doalig-footer">
+          <el-button @click="handleDrawerClose">取消</el-button>
+          <el-button type="primary" class="save-btn" @click="handleSaveSchedule">保存</el-button>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -667,19 +770,66 @@ export default {
 
       drawerVisibility: false,
       showSchedulingBtn:false,
+      activeScheduleName: "first",
+
+      temporarySchedule: {
+        time: "",
+        rest: "1",
+        restTimeStart: "",
+        restTimeStartEnd: "",
+        workTimeStartList:[
+          {
+            workTimeStart:"",
+            workTImeEnd: "",
+          }
+        ],
+        
+      },
     };
   },
   methods: {
+    //班次设置保存
+    handleSaveSchedule(){
+      console.log("班次设置保存");
+      console.log(this.temporarySchedule);
+      console.log(this.activeScheduleName);
+    },
+
+    //排班添加工作时间
+    handleAddWorkTime(){
+      this.temporarySchedule.workTimeStartList.push({
+        workTimeStart:"",
+        workTimeEnd: "",
+      })
+    },
+
+    //排班删除工作时间
+    handleDeleteWorkTime(index){
+      this.temporarySchedule.workTimeStartList.splice(index, 1);
+    },
+
+    //切换排班固定班次和临时班次
+    handleScheduleTabsClick(tab) {
+      this.activeScheduleName = tab.name;
+    },
+
+    //before close 排班弹窗
     handleDrawerBeforeClose(done) {
       this.drawerVisibility = false;
     },
 
-
+    // 点击排班按钮
     handleClickScheduling() {
       console.log("点击排班");
       this.drawerVisibility = true;
     },
 
+    // 点击排班弹框中的班次
+    handleScheduleItemClick(item) {
+      console.log("点击排班弹框中的班次", item);
+      //this.currentSchedulingData.schedule = [item];
+      //this.drawerVisibility = false;
+    },
 
     statisticsAddr() {
       setTimeout(() => {

@@ -960,5 +960,85 @@
 }
 
 .dialog-schedule-main{
+  padding:0 24px;
+  padding-bottom: 24px;
+}
 
+.dialog-schedule-main.{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  
+}
+.dialog-schedule-main .schedule-item{
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.dialog-schedule-main .schedule-item .colorblock{
+  width: 24px;
+  height: 24px;
+  /* background-color: red; */
+  margin: 1px 0 0 1px;
+  line-height: 24px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.dialog-schedule-main .schedule-address{
+  margin-top: 12px;
+}
+.schedule-list-box{
+  padding-bottom: 12px;
+}
+.schedule-list{
+  margin-top: 12px;
+}
+
+.schedule-address .el-select{
+  margin-top: 12px;
+}
+
+
+.doalig-footer{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.doalig-footer .save-btn{
+  margin-left: 12px;
+}
+
+.rest-time-picker{
+  display: flex;
+  align-items: center; 
+  justify-content: flex-start;
+}
+
+.work-time-picker{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+}
+.time-picker-c{
+  margin: 0 8px;
+}
+
+.dialog-schedule-main .el-date-editor.el-input{
+  width: 120px;
+}
+.dialog-delete-btn .el-icon-close{
+  font-size: 12px;
+  color: #6699ee; 
+  margin-left: 12px;
+  cursor: pointer;
 }

@@ -949,3 +949,16 @@
   border-radius: 1px;
   /*background-color: #83aef2;*/
 }
+
+.customized-scheduling
+  .kqeditpb_main .select-border-style{
+  border: 1px solid #6699ee !important;
+}
+
+.scheduling-btn{
+  margin-left: 12px;
+}
+
+.dialog-schedule-main{
+
+}

@@ -605,3 +605,25 @@ export const accMul = (num1, num2) => {
 }
 
 
+export const getWeekDates = (date) => {
+    console.log(date)
+    const today =date ? new Date(date) : new Date();
+    const dayOfWeek = today.getDay(); // 获取今天是本周的第几天
+    const monday = new Date(today); // 克隆今天的日期
+    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // 计算今天到周一的差值
+    monday.setDate(today.getDate() + diffToMonday); // 计算本周周一的日期
+
+    let dayChinese = ['一', '二', '三', '四', '五', '六', '日'];
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        weekDates.push({
+            date:date.getDate(),
+            day: dayChinese[i],
+            key:'day'+(i+1)
+        });
+    }
+
+    return weekDates;
+}

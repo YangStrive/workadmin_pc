@@ -1042,3 +1042,68 @@
   margin-left: 12px;
   cursor: pointer;
 }
+
+.schuedle-operate{
+  margin: 12px 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.operate-selected{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+}
+.operate-selected .select-text{
+
+  font-size: 14px;    
+  color: #8f959e;
+  line-height: 22px;
+  font-weight: 400;
+}
+
+.operate_btn{
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 100px;
+}
+
+.customized-scheduling
+  .kqeditpb_main
+  .kqpb_sel{
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .set-schuedle-btn{
+    margin-left: 12px;
+  }
+  .selected-schedlu-info{
+    margin-left: 12px;
+    padding: 0px 10px;
+    background-color: #eed366;
+    border-radius: 4px;
+
+  }
+  .selected-schedlu-info p{
+    font-size: 12px;
+    color: #fff;
+    line-height: 22px;
+    font-weight: 400;
+  }
+  .cell-schedule-box{
+    height: 39px;
+  }
+
+.cell-schedule-box p{
+  font-size: 12px;
+  color: #5e6d82;
+  line-height: 12px;
+  text-align: center; 
+}
+.cell-disable{
+  background-color: #f8fbfe;
+}

@@ -502,7 +502,6 @@
     </el-dialog>
   </div>
 </template>
-
 <script>
 import $ from "jquery";
 import * as util from "../../assets/js/util.js";

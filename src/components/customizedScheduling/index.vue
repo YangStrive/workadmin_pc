@@ -104,12 +104,15 @@
               <ul class="schedule-list">
                 <li
                   class="schedule-item"
-                  v-for="(item, index) in [{selected:1,style:'A',name:'A'}]"
+                  v-for="(item, index) in fixedSchedules"
                   :key="index"
                   @click="handleScheduleItemClick(item)"
                 >
-                  <div class="colorblock" :class="'colorblock_item_' + item.style"><p>{{ item.name }}</p></div>
-                  
+                  <div class="colorblock" :class="'colorblock_item_' + item.style">
+                    <p>{{ item.name }}</p>
+                    <p>{{ item.start_time }} - {{ item.end_time }}</p>
+                    <p>工作时间：{{ item.work_hours }}</p>
+                  </div>
                 </li>
               </ul>
 
@@ -230,20 +233,8 @@ export default {
         
       },
 
-      //所有工作地点
-      personAllWorkAddr: [
-        {
-          workplace_id: 1,
-          workplace_name: "工作地点1",
-        },
-        {
-          workplace_id: 2,
-          workplace_name: "工作地点2",
-        },
-      ],
 
       currentSchedulingData: {
-        position_id: "",
         schedule: [],
       },
 
@@ -263,6 +254,41 @@ export default {
           scheduleInfo: "9:00 - 18:00",
         },
       },
+      fixedSchedules:[
+        {
+            "id": "1899",
+            "name": "A",
+            "start_time": "07:00",
+            "end_time": "10:00",
+            "cross": 0,
+            "type": "1",
+            "rest_start_time": "",
+            "rest_end_time": "",
+            "work_hours": 3
+        },
+        {
+            "id": "1900",
+            "name": "B",
+            "start_time": "10:00",
+            "end_time": "16:00",
+            "cross": 0,
+            "type": "1",
+            "rest_start_time": "",
+            "rest_end_time": "",
+            "work_hours": 6
+        },
+        {
+            "id": "1901",
+            "name": "C",
+            "start_time": "16:00",
+            "end_time": "22:00",
+            "cross": 0,
+            "type": "1",
+            "rest_start_time": "",
+            "rest_end_time": "",
+            "work_hours": 6
+        }
+      ],
     }
   },
   // 监听属性 类似于data概念
@@ -387,57 +413,30 @@ export default {
     },
 
     //获取所有人的排班信息
-    getAllSchedulingList() {
-      // return
-      util.ajax({
-        url: "/attendance/user_schedule",
-        type: "GET",
-        data: {
-          team_id: this.team_id,
-          project_id: this.project_id,
-          task_id: this.task_id,
-          start_date: this.start_date,
-          group_ids: this.group_ids,
-          user_ids: this.user_ids,
-        },
-        success: (res) => {
-          console.log(res);
-          let scheduleData = [];
-          res.data.forEach((item) => {
-            let obj = {
-              user_id: item.user_id,
-              user_name: item.user_name,
-            };
-            for (let i = 0; i < 7; i++) {
-              obj['day'+(i+1)] = {
-                scheduleId: 0,
-                scheduleName: "A",
-                scheduleStyle: "",
-                scheduleInfo: "9:00 - 18:00",
-                currentCellSelected: false,
-                disabled: i < 3 ? true : false,
-              };
-            }
-            scheduleData.push(obj);
-          });
+    async getAllSchedulingList() {
+      try {
+      let res = await util.ajaxPromise(
+        { url: "/attendance/user_schedule",
+          type: "GET",
+          data: {
+            team_id: this.team_id,
+            project_id: this.project_id,
+            task_id: this.task_id,
+            start_date: this.start_date,
+            group_ids: this.group_ids,
+            user_ids: this.user_ids,
+          }})
+      },
 
-          this.schedulingList = scheduleData;
-          console.log(this.schedulingList);
-        },
-        error: (xhr, status) => {
-          this.load_end = true;
-        },
-        noNetwork: () => {
-          this.load_end = true;
-          // 网络超时
-          this.$message({
-            showClose: true,
-            message: "网络连接失败，请检查网络",
-            type: "warning",
-          });
-        },
-      });
-    },
+      if(res.code == 0 ){
+        let data = res.data;
+        let schedulingList = [];
+        
+        this.schedulingList
+      }
+      } catch (error) {
+        
+      }
   }
   //beforeCreate () { }, // 生命周期 - 创建之前
   //beforeMount () { }, // 生命周期 - 挂载之前

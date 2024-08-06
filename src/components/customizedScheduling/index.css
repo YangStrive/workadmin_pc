@@ -964,33 +964,24 @@
   padding-bottom: 24px;
 }
 
-.dialog-schedule-main.{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  
-}
+
 .dialog-schedule-main .schedule-item{
-  width: 28px;
-  height: 28px;
   box-sizing: border-box;
-  border: 1px solid transparent;
-  margin-right: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
   cursor: pointer;
+  padding: 12px 0;
+  border-radius: 10px;
+  background-color: #fcbd41;
 }
 
 .dialog-schedule-main .schedule-item .colorblock{
-  width: 24px;
-  height: 24px;
-  /* background-color: red; */
   margin: 1px 0 0 1px;
   line-height: 24px;
-  text-align: center;
-  font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  text-align: left;
+  padding: 0 12px;
+  font-size: 14px;
 }
 
 .dialog-schedule-main .schedule-address{
@@ -1106,4 +1097,7 @@
 }
 .cell-disable{
   background-color: #f8fbfe;
+}
+.active-schedule{
+  border: 2px solid #6699ee;
 }

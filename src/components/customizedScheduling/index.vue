@@ -35,13 +35,13 @@
             <span v-else>已选择 {{ selectedSchedulingNum }} 个</span>
             <span>，为其排班</span>
           </div>
-          <div class="selected-schedlu-info"  v-if="currentSelectedSchedule.scheduleId">
-            <p>固定A班次</p>
-            <p>9:00-18:00</p>
+          <div class="selected-schedlu-info"  v-if="currentSelectedSchedule.schedule_id">
+            <p>{{currentSelectedSchedule.schedule_name}}</p>
+            <p>{{currentSelectedSchedule.start_time}}-{{ currentSelectedSchedule.start_time }}</p>
           </div>
           <div class="set-schuedle-btn" >
-            <el-button type="primary" size="mini" @click="handleClickSchedulingSelect" v-if="!currentSelectedSchedule.scheduleId">选择班次</el-button>
-            <el-button type="primary" size="mini" @click="handleClickSchedulingSwitch" v-if="currentSelectedSchedule.scheduleId">切换班次</el-button>
+            <el-button type="primary" size="mini" @click="handleClickSchedulingSelect" v-if="!currentSelectedSchedule.schedule_id">选择班次</el-button>
+            <el-button type="primary" size="mini" @click="handleClickSchedulingSwitch" v-if="currentSelectedSchedule.schedule_id">切换班次</el-button>
 
           </div>
         </div>
@@ -70,15 +70,19 @@
           >
             <template slot-scope="scope">
               <template v-if="scope.row[item.key].disabled">
-                <div class="cell-schedule-box cell-disable" >
-                  <p>{{scope.row[item.key].scheduleName }}</p>
-                  <p>{{scope.row[item.key].scheduleInfo }}</p>
+                <div class="cell-schedule-box cell-disable">
+                  <div  v-for="(sitem,index) in scope.row[item.key].scheduleList" :key="index">
+                    <p>{{sitem.schedule_name }}</p>
+                    <p v-if="sitem.start_time">{{sitem.start_time }}-{{ sitem.end_time }}</p>
+                  </div>
                 </div>
               </template>
               <template v-else>
                 <div class="cell-schedule-box" :class="[scope.row[item.key].currentCellSelected ? 'select-border-style' : '']" >
-                  <p>{{scope.row[item.key].scheduleName }}</p>
-                  <p>{{scope.row[item.key].scheduleInfo }}</p>
+                  <div  v-for="(sitem,index) in scope.row[item.key].scheduleList" :key="index">
+                    <p>{{sitem.schedule_name }}</p>
+                    <p v-if="sitem.start_time">{{sitem.start_time }}-{{ sitem.end_time }}</p>
+                  </div>
                 </div>
               </template>
             </template>
@@ -100,18 +104,18 @@
         <div class="schedule-box">
           <div class="schedule-box-item" v-if="activeScheduleName == 'first'">
             <div class="schedule-list-box">
-              <h3>当日班次</h3>
               <ul class="schedule-list">
                 <li
                   class="schedule-item"
+                  :class="[ currentSelectedSchedule.schedule_id == item.schedule_id ? 'active-schedule' : '']"
                   v-for="(item, index) in fixedSchedules"
                   :key="index"
                   @click="handleScheduleItemClick(item)"
                 >
                   <div class="colorblock" :class="'colorblock_item_' + item.style">
-                    <p>{{ item.name }}</p>
-                    <p>{{ item.start_time }} - {{ item.end_time }}</p>
-                    <p>工作时间：{{ item.work_hours }}</p>
+                    <p>班次名称 {{ item.name }}</p>
+                    <p>工作时间 {{ item.start_time }} - {{ item.end_time }}</p>
+                    <p>工作时长 {{ item.work_hours }}</p>
                   </div>
                 </li>
               </ul>
@@ -181,7 +185,7 @@
         </div>
         <div class="doalig-footer">
           <el-button @click="handleDrawerClose">取消</el-button>
-          <el-button type="primary" class="save-btn" @click="handleSaveSchedule">保存</el-button>
+          <el-button type="primary" class="save-btn" @click="handleSaveSchedule">确定</el-button>
         </div>
       </div>
     </el-dialog>
@@ -233,16 +237,7 @@ export default {
         
       },
 
-
-      currentSchedulingData: {
-        schedule: [],
-      },
-
       currentSelectedSchedule: {
-        scheduleId: 0,
-        scheduleName: "A",
-        scheduleStyle: "",
-        scheduleInfo: "9:00 - 18:00",
       },
 
       selectedScheduleInfo:{
@@ -256,8 +251,8 @@ export default {
       },
       fixedSchedules:[
         {
-            "id": "1899",
-            "name": "A",
+            "schedule_id": "1899",
+            "schedule_name": "A",
             "start_time": "07:00",
             "end_time": "10:00",
             "cross": 0,
@@ -267,8 +262,8 @@ export default {
             "work_hours": 3
         },
         {
-            "id": "1900",
-            "name": "B",
+            "schedule_id": "1900",
+            "schedule_name": "B",
             "start_time": "10:00",
             "end_time": "16:00",
             "cross": 0,
@@ -278,8 +273,8 @@ export default {
             "work_hours": 6
         },
         {
-            "id": "1901",
-            "name": "C",
+            "schedule_id": "1901",
+            "schedule_name": "C",
             "start_time": "16:00",
             "end_time": "22:00",
             "cross": 0,
@@ -348,9 +343,24 @@ export default {
 
     //班次设置保存
      handleSaveSchedule(){
-      console.log("班次设置保存");
-      console.log(this.temporarySchedule);
-      console.log(this.activeScheduleName);
+      console.log("保存班次设置");
+      this.drawerVisibility = false;
+      let scheduleList = this.schedulingList;
+      //遍历scheduleList 将currentCellSelected为true的班次设置为当前选择的班次
+      for(let i = 0; i < scheduleList.length; i++){
+        for(let key in scheduleList[i]){
+          if(scheduleList[i][key].currentCellSelected){
+            scheduleList[i][key].scheduleList = [this.currentSelectedSchedule];
+            scheduleList[i][key].currentCellSelected = true;
+          }
+        }
+      }
+    },
+
+    //取消班次选择
+    handleDrawerClose(){
+      this.drawerVisibility = false;
+      this.currentSelectedSchedule = {};
     },
 
     //排班添加工作时间
@@ -390,22 +400,33 @@ export default {
     // 点击排班弹框中的班次
     handleScheduleItemClick(item) {
       console.log("点击排班弹框中的班次", item);
-      //this.currentSchedulingData.schedule = [item];
-      //this.drawerVisibility = false;
+      this.currentSelectedSchedule = item;
     },
 
-
-
+    //点击单元格
     handleCellClick(row, column, cell, event){
       let columnProperty = column.property;
       let rowProperty = row.user_id;
-      this.schedulingList.forEach((item) => {
-        if (item.user_id == rowProperty) {
-          item[columnProperty].currentCellSelected = !item[columnProperty].currentCellSelected;
-        }
-      });
+      let scheduleList = this.schedulingList;
+      let currentSelectedSchedule = this.currentSelectedSchedule;
 
-      //this.showSchedulingBtn = true;
+      // if(row[columnProperty].scheduleList.length > 0){
+      //   console.log('编辑单个人排班')
+      //   return false;
+      // }
+
+      for(let i = 0; i < scheduleList.length; i++){
+        if(scheduleList[i].user_id == rowProperty){
+          if(scheduleList[i][columnProperty].disabled) return;
+
+          if(currentSelectedSchedule.schedule_id){
+            scheduleList[i][columnProperty].scheduleList = [currentSelectedSchedule];
+            scheduleList[i][columnProperty].currentCellSelected = true;
+          }else{
+            scheduleList[i][columnProperty].currentCellSelected = !scheduleList[i][columnProperty].currentCellSelected;
+          }
+        }
+      }
     },
 
     handleHeaderClick(){
@@ -415,8 +436,9 @@ export default {
     //获取所有人的排班信息
     async getAllSchedulingList() {
       try {
-      let res = await util.ajaxPromise(
-        { url: "/attendance/user_schedule",
+        let res = await util.ajaxPromise(
+        { 
+          url: "/attendance/user_schedule",
           type: "GET",
           data: {
             team_id: this.team_id,
@@ -425,18 +447,35 @@ export default {
             start_date: this.start_date,
             group_ids: this.group_ids,
             user_ids: this.user_ids,
-          }})
-      },
+          }
+        });
 
-      if(res.code == 0 ){
-        let data = res.data;
-        let schedulingList = [];
-        
-        this.schedulingList
-      }
+        if(res.errno == 0 ){
+          let scheduleData = [];
+          let currnetTimer = (new Date().getTime())/1000;
+          res.data.forEach((item) => {
+            let obj = {
+              user_id: item.user_id,
+              user_name: item.user_name,
+            };
+
+            for (let i = 0; i < 7; i++) {
+              obj['day'+(i+1)] = {
+                currentCellSelected: false,
+                scheduleList: item['date_schedule'][i].schedule,
+                disabled: item['date_schedule'][i].date  < currnetTimer ? true : false,//+ 86400
+              };
+            }
+            scheduleData.push(obj);
+          });
+
+          this.schedulingList = scheduleData;
+          console.log(this.schedulingList,999);
+        }
       } catch (error) {
-        
+        throw error
       }
+    },
   }
   //beforeCreate () { }, // 生命周期 - 创建之前
   //beforeMount () { }, // 生命周期 - 挂载之前

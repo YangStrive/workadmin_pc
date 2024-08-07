@@ -73,7 +73,8 @@
                 <div class="cell-schedule-box cell-disable">
                   <div  v-for="(sitem,index) in scope.row[item.key].scheduleList" :key="index">
                     <p>{{sitem.schedule_name }}</p>
-                    <p v-if="sitem.start_time">{{sitem.start_time }}-{{ sitem.end_time }}</p>
+                    <p v-if="sitem.start_time">工作时间{{sitem.start_time }}-{{ sitem.end_time }}</p>
+                    <p v-if="sitem.work_hours">工作时长{{ sitem.work_hours }}</p>
                   </div>
                 </div>
               </template>
@@ -81,7 +82,8 @@
                 <div class="cell-schedule-box" :class="[scope.row[item.key].currentCellSelected ? 'select-border-style' : '','colorblock_item_'+scope.row[item.key].style]" >
                   <div  v-for="(sitem,index) in scope.row[item.key].scheduleList" :key="index">
                     <p>{{sitem.schedule_name }}</p>
-                    <p v-if="sitem.start_time">{{sitem.start_time }}-{{ sitem.end_time }}</p>
+                    <p v-if="sitem.start_time">工作时间{{sitem.start_time }}-{{ sitem.end_time }}</p>
+                    <p v-if="sitem.work_hours">工作时长{{ sitem.work_hours }}</p>
                   </div>
                 </div>
               </template>

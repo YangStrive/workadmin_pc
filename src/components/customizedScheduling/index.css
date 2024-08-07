@@ -57,7 +57,7 @@
     border-bottom: 0;
 }*/
 .customized-scheduling .kqeditpb_main .el-table tr {
-  height: 44px;
+  height:55px;
 }
 .customized-scheduling .kqeditpb_main .pb_edit_table .el-table .disabled_style {
   background-color: #f8fbfe;
@@ -136,7 +136,7 @@
 }
 .customized-scheduling .kqeditpb_main .pb_edit_table .el-table__body-wrapper td + td .cell {
   padding: 1px;
-  height: 44px;
+  height: 55px;
   border: 1px solid transparent;
 }
 .customized-scheduling .kqeditpb_main .el-table__body-wrapper td:first-child .cell {
@@ -1086,14 +1086,18 @@
     font-weight: 400;
   }
   .cell-schedule-box{
-    height: 39px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
 .cell-schedule-box p{
   font-size: 12px;
-  color: #5e6d82;
+  color: #000;
   line-height: 12px;
-  text-align: center; 
+  text-align: left; 
+  padding: 2px 0;
 }
 .cell-disable{
   background-color: #f8fbfe;

@@ -46,7 +46,7 @@
           </div>
         </div>
         <div class="operate_btn">
-          <el-button type="primary" size="mini">取消</el-button>
+          <el-button type="primary" size="mini" @click="handleScheduleDataCancel">取消</el-button>
           <el-button type="primary" size="mini">保存</el-button>
         </div>  
       </div>
@@ -205,6 +205,7 @@ export default {
   },
   data () {
     return {
+      weekFirstDate:"",
       team_id: "",
       project_id: "",
       task_id: "",
@@ -324,12 +325,25 @@ export default {
   methods: {
     //初始化
     init() {
+      this.getCurrentWeekFirstDate();
       let m = this.getAllSchedulingList();
+    },
+
+    //获取当前周的周一日期
+    getCurrentWeekFirstDate(){
+      let week_day = new Date().getDay();
+      let sun = util.getLocalTime(
+        new Date().getTime() -
+          (week_day == 0 ? 6 : week_day - 1) * 24 * 60 * 60 * 1000,
+        "yyyy-MM-dd"
+      );
+      // console.log(sun)
+      this.weekFirstDate = sun;
     },
 
     handleWeekChange(val) {
       //val为输入框显示内容
-      this.start_date = util.getLocalTime(
+      this.weekFirstDate = util.getLocalTime(
         this.kq_week_obj.getTime() - 24 * 60 * 60 * 1000,
         "yyyy-MM-dd"
       );
@@ -338,7 +352,7 @@ export default {
         "yyyy-MM-dd"
       );
       //this.getAllSchedulingList();
-      this.schedulingTableHeader = util.getWeekDates(this.start_date)
+      this.schedulingTableHeader = util.getWeekDates(this.weekFirstDate)
     },
 
     //班次设置保存
@@ -410,21 +424,30 @@ export default {
       let scheduleList = this.schedulingList;
       let currentSelectedSchedule = this.currentSelectedSchedule;
 
-      // if(row[columnProperty].scheduleList.length > 0){
-      //   console.log('编辑单个人排班')
-      //   return false;
-      // }
+      if(row[columnProperty].scheduleList.length > 0 && !row[columnProperty].currentCellSelected){
+        console.log('编辑单个人排班')
+        return false;
+      }
 
+      console.log(column)
       for(let i = 0; i < scheduleList.length; i++){
+
+        //点击单元格数据为当前用户的数据
         if(scheduleList[i].user_id == rowProperty){
+          //过期的排班不可编辑
           if(scheduleList[i][columnProperty].disabled) return;
 
-          if(currentSelectedSchedule.schedule_id){
+          //点击已有排班，切换班次
+          scheduleList[i][columnProperty].currentCellSelected = !scheduleList[i][columnProperty].currentCellSelected;
+          if(currentSelectedSchedule.schedule_id && scheduleList[i][columnProperty].currentCellSelected){
             scheduleList[i][columnProperty].scheduleList = [currentSelectedSchedule];
-            scheduleList[i][columnProperty].currentCellSelected = true;
-          }else{
-            scheduleList[i][columnProperty].currentCellSelected = !scheduleList[i][columnProperty].currentCellSelected;
           }
+
+          if(!scheduleList[i][columnProperty].currentCellSelected){
+            scheduleList[i][columnProperty].scheduleList = [];
+          }
+
+          break;
         }
       }
     },
@@ -444,7 +467,7 @@ export default {
             team_id: this.team_id,
             project_id: this.project_id,
             task_id: this.task_id,
-            start_date: this.start_date,
+            start_date: this.weekFirstDate,
             group_ids: this.group_ids,
             user_ids: this.user_ids,
           }
@@ -463,7 +486,7 @@ export default {
               obj['day'+(i+1)] = {
                 currentCellSelected: false,
                 scheduleList: item['date_schedule'][i].schedule,
-                disabled: item['date_schedule'][i].date  < currnetTimer ? true : false,//+ 86400
+                disabled: item['date_schedule'][i].date + 86400  < currnetTimer ? true : false,//
               };
             }
             scheduleData.push(obj);
@@ -476,6 +499,10 @@ export default {
         throw error
       }
     },
+
+    handleScheduleDataCancel(){
+      this.getAllSchedulingList();
+    }
   }
   //beforeCreate () { }, // 生命周期 - 创建之前
   //beforeMount () { }, // 生命周期 - 挂载之前

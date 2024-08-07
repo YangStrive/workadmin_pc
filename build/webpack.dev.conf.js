@@ -32,13 +32,4 @@ module.exports = merge(baseWebpackConfig, {
     }),
     new FriendlyErrorsPlugin()
   ],
-  devServer: {
-    //配置代理
-    proxy: {
-      '/sea/api': {
-        target: 'http://work.doumi.com', // 后台api服务器的地址
-        changeOrigin: true, // 开启代理，用于跨域
-      }
-    }
-  }
 })

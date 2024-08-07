@@ -1,5 +1,5 @@
 .customized-scheduling {
-  padding: 16px 20px 0 20px;
+  padding: 16px 20px 24px 20px;
 }
 .customized-scheduling .kqeditpb_top .kqpb_export_date .el-dialog {
   width: 400px;
@@ -230,6 +230,7 @@
 
 .customized-scheduling {
   padding: 0 20px;
+  padding-bottom: 24px;
 }
 .customized-scheduling .kqeditpb_top {
   height: 50px;
@@ -969,14 +970,13 @@
   box-sizing: border-box;
   margin-bottom: 12px;
   cursor: pointer;
-  padding: 12px 0;
-  border-radius: 10px;
-  background-color: #fcbd41;
+  padding: 8px 0;
+  border-radius: 6px;
 }
 
 .dialog-schedule-main .schedule-item .colorblock{
   margin: 1px 0 0 1px;
-  line-height: 24px;
+  line-height: 16px;
   font-weight: 600;
   color: #ffffff;
   text-align: left;
@@ -1074,7 +1074,7 @@
   }
   .selected-schedlu-info{
     margin-left: 12px;
-    padding: 0px 10px;
+    padding: 4px 10px;
     background-color: #eed366;
     border-radius: 4px;
 
@@ -1082,7 +1082,7 @@
   .selected-schedlu-info p{
     font-size: 12px;
     color: #fff;
-    line-height: 22px;
+    line-height: 14px;
     font-weight: 400;
   }
   .cell-schedule-box{
@@ -1099,5 +1099,31 @@
   background-color: #f8fbfe;
 }
 .active-schedule{
-  border: 2px solid #6699ee;
+  border: 2px solid #0486fe;
+  opacity: 0.8;
+}
+
+.colorblock_item_1{
+  background-color: #83aef2;
+}
+.colorblock_item_2{
+  background-color: #fea560;
+}
+.colorblock_item_3{
+  background-color: #8bd574;
+}
+.colorblock_item_4{
+  background-color: #fa876d;
+}
+.colorblock_item_5{
+  background-color: #cd88df;
+}
+.colorblock_item_6{
+  background-color: #fcbd41;
+}
+.colorblock_item_7{
+  background-color: #4ad6d1;
+}
+.colorblock_item_0{
+  background-color: #b7de30;
 }

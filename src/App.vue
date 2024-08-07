@@ -53,7 +53,7 @@
         }
       },
       computed:{
-
+        
       },
       methods:{
         init (){

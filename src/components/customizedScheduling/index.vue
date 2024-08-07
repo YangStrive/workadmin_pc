@@ -35,7 +35,7 @@
             <span v-else>已选择 {{ selectedSchedulingNum }} 个</span>
             <span>，为其排班</span>
           </div>
-          <div class="selected-schedlu-info"  v-if="currentSelectedSchedule.schedule_id">
+          <div class="selected-schedlu-info"  v-if="currentSelectedSchedule.schedule_id" :class="['colorblock_item_' + currentSelectedSchedule.style]">
             <p>{{currentSelectedSchedule.schedule_name}}</p>
             <p>{{currentSelectedSchedule.start_time}}-{{ currentSelectedSchedule.start_time }}</p>
           </div>
@@ -78,7 +78,7 @@
                 </div>
               </template>
               <template v-else>
-                <div class="cell-schedule-box" :class="[scope.row[item.key].currentCellSelected ? 'select-border-style' : '']" >
+                <div class="cell-schedule-box" :class="[scope.row[item.key].currentCellSelected ? 'select-border-style' : '','colorblock_item_'+scope.row[item.key].style]" >
                   <div  v-for="(sitem,index) in scope.row[item.key].scheduleList" :key="index">
                     <p>{{sitem.schedule_name }}</p>
                     <p v-if="sitem.start_time">{{sitem.start_time }}-{{ sitem.end_time }}</p>
@@ -107,13 +107,13 @@
               <ul class="schedule-list">
                 <li
                   class="schedule-item"
-                  :class="[ currentSelectedSchedule.schedule_id == item.schedule_id ? 'active-schedule' : '']"
                   v-for="(item, index) in fixedSchedules"
+                  :class="[ temporaryStorage.schedule_id == item.schedule_id ? 'active-schedule' : '','colorblock_item_' + index]"
                   :key="index"
-                  @click="handleScheduleItemClick(item)"
+                  @click="handleScheduleItemClick(item,index)"
                 >
-                  <div class="colorblock" :class="'colorblock_item_' + item.style">
-                    <p>班次名称 {{ item.name }}</p>
+                  <div class="colorblock">
+                    <p>班次名称 {{ item.schedule_name }}</p>
                     <p>工作时间 {{ item.start_time }} - {{ item.end_time }}</p>
                     <p>工作时长 {{ item.work_hours }}</p>
                   </div>
@@ -125,33 +125,27 @@
           <div class="schedule-box-item" v-else>
             <el-form  label-width="80px" :model="temporarySchedule">
               <el-form-item label="工作时间">
-                <div class="work-time-picker" v-for="(item, index) in temporarySchedule.workTimeStartList" :key="index">
+                <div class="work-time-picker" v-for="(item, index) in temporarySchedule.workTimetList" :key="index">
                   <el-time-picker
                     size="small"
                     format="HH:mm"
-                    v-model="temporarySchedule.workTimeStartList[index].workTimeStart"
-                    :picker-options="{
-                      selectableRange: '18:30:00 - 20:30:00'
-                    }"
+                    v-model="temporarySchedule.workTimetList[index].start_time"
                     placeholder="请选择">
                   </el-time-picker>
                   <span class="time-picker-c">至</span>  
                   <el-time-picker
                     size="small"
                     format="HH:mm"
-                    v-model="temporarySchedule.workTimeStartList[index].workTimeEnd"
-                    :picker-options="{
-                      selectableRange: '18:30:00 - 20:30:00'
-                    }"
+                    v-model="temporarySchedule.workTimetList[index].end_time"
                     placeholder="任意时间点">
                   </el-time-picker>
-                  <div class="dialog-delete-btn" @click="handleDeleteWorkTime(index)" v-if="temporarySchedule.workTimeStartList.length > 1">
+                  <div class="dialog-delete-btn" @click="handleDeleteWorkTime(index)" v-if="temporarySchedule.workTimetList.length > 1">
                     <i class="el-icon-close" ></i>
                   </div>
                 </div>
                 <el-button type="text" @click="handleAddWorkTime">添加</el-button>
               </el-form-item>
-              <template v-if="temporarySchedule.workTimeStartList.length == 1">
+              <template v-if="temporarySchedule.workTimetList.length == 1">
                 <el-form-item label="休息时间">
                   <el-radio class="radio" v-model="temporarySchedule.rest" label="1">启用</el-radio>
                   <el-radio class="radio" v-model="temporarySchedule.rest" label="2">不起用</el-radio>
@@ -161,10 +155,7 @@
                     <el-time-picker
                       size="small"
                       format="HH:mm"
-                      v-model="temporarySchedule.restTimeStart"
-                      :picker-options="{
-                        selectableRange: '18:30:00 - 20:30:00'
-                      }"
+                      v-model="temporarySchedule.rest_start_time"
                       placeholder="任意时间点">
                     </el-time-picker>
                     <span class="time-picker-c">至</span> 
@@ -172,9 +163,6 @@
                       size="small"
                       format="HH:mm"
                       v-model="temporarySchedule.restTimeEnd"
-                      :picker-options="{
-                        selectableRange: '18:30:00 - 20:30:00'
-                      }"
                       placeholder="任意时间点">
                     </el-time-picker>
                   </div>
@@ -216,8 +204,8 @@ export default {
         firstDayOfWeek: 1,
       },
       showSchedulingBtn: false, //是否显示排班按钮
-      schedulingList:[],
-      schedulingTableHeader: [],
+      schedulingList:[],//排班所有数据
+      schedulingTableHeader: [],//排班表头
 
       drawerVisibility: false,
       showSchedulingBtn:false,
@@ -225,14 +213,13 @@ export default {
 
       //临时班次
       temporarySchedule: {
-        time: "",
-        rest: "1",
-        restTimeStart: "",
-        restTimeStartEnd: "",
-        workTimeStartList:[
+        rest: "1",//是否启用休息时间
+        rest_start_time: "",
+        rest_end_time: "",
+        workTimetList:[
           {
-            workTimeStart:"",
-            workTImeEnd: "",
+            start_time:new Date(2016, 9, 10, 9, 0),
+            end_time:new Date(2016, 9, 10, 18, 0)
           }
         ],
         
@@ -241,15 +228,6 @@ export default {
       currentSelectedSchedule: {
       },
 
-      selectedScheduleInfo:{
-        type:1,//1固定 2临时
-        schedule:{
-          scheduleId: 0,
-          scheduleName: "A",
-          scheduleStyle: "",
-          scheduleInfo: "9:00 - 18:00",
-        },
-      },
       fixedSchedules:[
         {
             "schedule_id": "1899",
@@ -285,6 +263,9 @@ export default {
             "work_hours": 6
         }
       ],
+      //临时存放选中的班次
+      temporaryStorage:{}
+
     }
   },
   // 监听属性 类似于data概念
@@ -315,10 +296,6 @@ export default {
   },
   // 生命周期 - 挂载完成（可以访问DOM元素）
   mounted () {
-    setTimeout(() => {
-      
-      this.load_end = false;
-    }, 1000);
 
     this.init();
   },
@@ -357,7 +334,14 @@ export default {
 
     //班次设置保存
      handleSaveSchedule(){
-      console.log("保存班次设置");
+      if(this.activeScheduleName == "first"){
+        console.log("保存固定班次设置");
+        this.currentSelectedSchedule = this.temporaryStorage;
+      }else{
+        console.log("保存临时班次设置");
+      }
+
+      console.log(this.temporarySchedule)
       this.drawerVisibility = false;
       let scheduleList = this.schedulingList;
       //遍历scheduleList 将currentCellSelected为true的班次设置为当前选择的班次
@@ -374,20 +358,20 @@ export default {
     //取消班次选择
     handleDrawerClose(){
       this.drawerVisibility = false;
-      this.currentSelectedSchedule = {};
+      this.temporaryStorage = {};
     },
 
     //排班添加工作时间
     handleAddWorkTime(){
-      this.temporarySchedule.workTimeStartList.push({
-        workTimeStart:"",
+      this.temporarySchedule.workTimetList.push({
+        start_time:"",
         workTimeEnd: "",
       })
     },
 
     //排班删除工作时间
     handleDeleteWorkTime(index){
-      this.temporarySchedule.workTimeStartList.splice(index, 1);
+      this.temporarySchedule.workTimetList.splice(index, 1);
     },
 
     //切换排班固定班次和临时班次
@@ -412,9 +396,9 @@ export default {
     },
 
     // 点击排班弹框中的班次
-    handleScheduleItemClick(item) {
+    handleScheduleItemClick(item,index) {
       console.log("点击排班弹框中的班次", item);
-      this.currentSelectedSchedule = item;
+      this.temporaryStorage = {...item,style:index};
     },
 
     //点击单元格
@@ -441,10 +425,12 @@ export default {
           scheduleList[i][columnProperty].currentCellSelected = !scheduleList[i][columnProperty].currentCellSelected;
           if(currentSelectedSchedule.schedule_id && scheduleList[i][columnProperty].currentCellSelected){
             scheduleList[i][columnProperty].scheduleList = [currentSelectedSchedule];
+            scheduleList[i][columnProperty].style = currentSelectedSchedule.style;
           }
 
           if(!scheduleList[i][columnProperty].currentCellSelected){
             scheduleList[i][columnProperty].scheduleList = [];
+            scheduleList[i][columnProperty].style = "";
           }
 
           break;
@@ -497,6 +483,8 @@ export default {
         }
       } catch (error) {
         throw error
+      } finally {
+        this.load_end = false;
       }
     },
 

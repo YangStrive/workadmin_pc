@@ -33,7 +33,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/sea/api': {
-        target: 'http://work.doumi.com', // 后台api服务器的地址
+        target: 'http://saas-test.doumi.com', // 后台api服务器的地址
         changeOrigin: true, // 开启代理，用于跨域
       }
     },

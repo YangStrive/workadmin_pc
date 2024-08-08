@@ -6,11 +6,11 @@
 		:before-close="handleDrawerBeforeClose">
 		<div class="dialog-schedule-main">
 			<el-tabs v-model="activeScheduleName" @tab-click="handleScheduleTabsClick">
-			<el-tab-pane label="固定班次" name="first"></el-tab-pane>
-			<el-tab-pane label="临时班次" name="second"></el-tab-pane>
+			<el-tab-pane label="固定班次" name="fixed"></el-tab-pane>
+			<el-tab-pane label="临时班次" name="temp"></el-tab-pane>
 			</el-tabs>
 			<div class="schedule-box">
-			<div class="schedule-box-item" v-if="activeScheduleName == 'first'">
+			<div class="schedule-box-item" v-if="activeScheduleName == 'fixed'">
 				<div class="schedule-list-box">
 				<ul class="schedule-list">
 					<li
@@ -94,6 +94,10 @@ export default {
       type: Boolean,
       default: false
     },
+    scheduleType: {
+      type: String,
+      default: 'fixed'
+    },
     temporaryStorage: {
       type: Object,
       default: () => ({
@@ -105,7 +109,7 @@ export default {
         workTimetList: [],
         rest: 2,
         rest_start_time: '',
-        restTimeEnd: ''
+        rest_end_time: ''
       })
     },
     fixedSchedules: {
@@ -123,7 +127,7 @@ export default {
             "work_hours": 3
         },
         {
-            "schedule_id": "1900",
+            "schedule_id": "1826",
             "schedule_name": "B",
             "start_time": "10:00",
             "end_time": "16:00",
@@ -145,6 +149,18 @@ export default {
             "work_hours": 6
         }
 			]
+    },
+    closeDialog: {
+      type: Function,
+      default: () => {}
+    },
+    saveScheduleData: {
+      type: Function,
+      default: () => {}
+    },
+    currentCellSchedule:{
+      type:Object,
+      default:'',
     }
   },
 	computed: {
@@ -152,17 +168,18 @@ export default {
 			get() {
 				return this.drawerVisibility;
 			},
-			set(val) {
-				this.$emit('update:drawerVisibility', val);
-			}
+      set(val) {
+        if(val){
+          this.init();
+        }
+      }
 		}
 	},
 		
 	data() {
 		return {
-      activeScheduleName: 'first',
+      activeScheduleName: 'fixed',
       temporarySchedule: {
-				schedule_id: '',
         schedule_name: '',
         start_time: '',
         end_time: '',
@@ -171,38 +188,43 @@ export default {
         rest: 2,
         rest_start_time: '',
 				rest_end_time: '',
-				temporaryStorage: {}
-			}
+			},
+			temporaryStorage: {}
     }
   },
+  created() {
+  },
 	methods: {
-    //班次设置保存
-		handleSaveSchedule(){
-      if(this.activeScheduleName == "first"){
-        console.log("保存固定班次设置");
-        this.currentSelectedSchedule = this.temporaryStorage;
-      }else{
-        console.log("保存临时班次设置");
+
+    init(){
+      this.activeScheduleName = this.scheduleType;
+      console.log("this.currentCellSchedule",this.currentCellSchedule);
+      if(this.scheduleType == 'fixed'){
+        this.temporaryStorage = this.currentCellSchedule || {};
       }
 
-      console.log(this.temporarySchedule)
-      this.vaisable = false;
-      let scheduleList = this.schedulingList;
-      //遍历scheduleList 将currentCellSelected为true的班次设置为当前选择的班次
-      // for(let i = 0; i < scheduleList.length; i++){
-      //   for(let key in scheduleList[i]){
-      //     if(scheduleList[i][key].currentCellSelected){
-      //       scheduleList[i][key].scheduleList = [this.currentSelectedSchedule];
-      //       scheduleList[i][key].currentCellSelected = true;
-      //     }
-      //   }
-      // }
+      if(this.scheduleType == 'temp'){
+        this.temporarySchedule.workTimetList = this.currentCellSchedule || [];
+
+        if(this.temporarySchedule.workTimetList.length == 1){
+          this.temporarySchedule.rest =  this.currentCellSchedule[0].rest_start_time ? 1 : 2;
+          this.temporarySchedule.rest_start_time = this.currentCellSchedule[0].rest_start_time;
+          this.temporarySchedule.rest_end_time = this.currentCellSchedule[0].rest_end_time;
+
+        }
+      }
+    },
+    //班次设置保存
+		handleSaveSchedule(){
+      this.saveScheduleData(this.temporaryStorage);
+      this.handleDrawerClose();
     },
 
     //取消班次选择
     handleDrawerClose(){
       this.vaisable = false;
       this.temporaryStorage = {};
+      this.closeDialog(false);
     },
 
     //排班添加工作时间
@@ -225,7 +247,9 @@ export default {
 
     //before close 排班弹窗
     handleDrawerBeforeClose(done) {
-      this.vaisable = false;
+      this.temporaryStorage = {};
+      this.closeDialog(false);
+      done();
     },
 
      // 点击排班弹框中的班次
@@ -233,6 +257,7 @@ export default {
       console.log("点击排班弹框中的班次", item);
       this.temporaryStorage = {...item,style:index};
     },
+  }
 }
 </script>
 

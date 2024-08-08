@@ -93,6 +93,18 @@
         <!-- 设置编辑弹窗内容 -->
       </div>
     </div>
+    <ScheduleDialog
+      :closeDialog="updateDrawerVisibility"
+      :saveScheduleData="handleSaveScheduleData"
+      :drawerVisibility="drawerVisibility"
+    />
+    <ScheduleDialog
+      :closeDialog="handleEditDialogVisible"
+      :saveScheduleData="handleEditSaveScheduleData"
+      :drawerVisibility="drawerEditVisibility"
+      :scheduleType="scheduleType"
+      :currentCellSchedule="currentCellSchedule"
+    />
   </div>
 </template>
 
@@ -101,11 +113,13 @@
 // 例如：import 《组件名称》 from '《组件路径》'
 
 import breadcrumb from "@/components/common/breadcrumb";
+import ScheduleDialog from "./components/ScheduleDialog"
 import * as util from "@/assets/js/util.js";
 
 export default {
   components: {
     breadcrumb,
+    ScheduleDialog
   },
   data () {
     return {
@@ -125,16 +139,18 @@ export default {
 
       drawerVisibility: false,
       showSchedulingBtn:false,
-      activeScheduleName: "first",
+      activeScheduleName: "fixed",//当前选中的班次类型
 
       //临时班次
 
 
       currentSelectedSchedule: {
       },
-
-      //临时存放选中的班次
-      temporaryStorage:{}
+      drawerEditVisibility: false,
+      scheduleType: "fixed",
+      currentCellSchedule:{},
+      editUseId: "",
+      editUseColumn: "",
 
     }
   },
@@ -202,7 +218,45 @@ export default {
       this.schedulingTableHeader = util.getWeekDates(this.weekFirstDate)
     },
 
+    //班次设置保存
+		handleSaveScheduleData(data){
+      if(this.activeScheduleName == "fixed"){
+        console.log("保存固定班次设置",data);
+        this.currentSelectedSchedule = data;
+      }else{
+        console.log("保存临时班次设置");
+      }
 
+      let scheduleList = this.schedulingList;
+      //遍历scheduleList 将currentCellSelected为true的班次设置为当前选择的班次
+      for(let i = 0; i < scheduleList.length; i++){
+        for(let key in scheduleList[i]){
+          if(scheduleList[i][key].currentCellSelected){
+            scheduleList[i][key].scheduleList = [this.currentSelectedSchedule];
+          }
+        }
+      }
+
+      this.scheduleList = scheduleList;
+    },
+
+    //保存编辑班次设置
+    handleEditSaveScheduleData(data){
+      console.log("保存编辑班次设置");
+      let scheduleList = this.schedulingList;
+
+      for(let i = 0; i < scheduleList.length; i++){
+        if(scheduleList[i].user_id == this.editUseId){
+          scheduleList[i][this.editUseColumn].scheduleList = [data];
+          scheduleList[i][this.editUseColumn].style = data.style;
+          scheduleList[i][this.editUseColumn].currentCellSelected = true;
+          break;
+        }
+      }
+
+      this.scheduleList = scheduleList;
+
+    },
 
     // 点击排班按钮
     handleClickSchedulingSelect() {
@@ -218,12 +272,26 @@ export default {
     //点击单元格
     handleCellClick(row, column, cell, event){
       let columnProperty = column.property;
-      let rowProperty = row.user_id;
+      let userId = row.user_id;
       let scheduleList = this.schedulingList;
       let currentSelectedSchedule = this.currentSelectedSchedule;
 
+      //过期的排班不可编辑
+      if(row[columnProperty].disabled) return;
+
       if(row[columnProperty].scheduleList.length > 0 && !row[columnProperty].currentCellSelected){
-        console.log('编辑单个人排班')
+        this.editUseId = userId;
+        this.editUseColumn = columnProperty;
+
+        this.scheduleType = row[columnProperty].scheduleList[0].type == 2 ? "temp" : "fixed";
+        if(this.scheduleType == "fixed"){
+          this.currentCellSchedule = row[columnProperty].scheduleList[0];
+          console.log(this.currentCellSchedule,888);
+        }else{
+          this.currentCellSchedule = row[columnProperty].scheduleList;
+        }
+
+        this.drawerEditVisibility = true;
         return false;
       }
 
@@ -231,9 +299,7 @@ export default {
       for(let i = 0; i < scheduleList.length; i++){
 
         //点击单元格数据为当前用户的数据
-        if(scheduleList[i].user_id == rowProperty){
-          //过期的排班不可编辑
-          if(scheduleList[i][columnProperty].disabled) return;
+        if(scheduleList[i].user_id == userId){
 
           //点击已有排班，切换班次
           scheduleList[i][columnProperty].currentCellSelected = !scheduleList[i][columnProperty].currentCellSelected;
@@ -304,7 +370,16 @@ export default {
 
     handleScheduleDataCancel(){
       this.getAllSchedulingList();
-    }
+    },
+
+    updateDrawerVisibility(val){
+      console.log(val);
+      this.drawerVisibility = val;
+    },
+
+    handleEditDialogVisible(val){
+      this.drawerEditVisibility = val;
+    },
   }
   //beforeCreate () { }, // 生命周期 - 创建之前
   //beforeMount () { }, // 生命周期 - 挂载之前

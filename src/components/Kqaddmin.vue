@@ -3,7 +3,7 @@
     <div class="kq-wapper">
       <h2>考勤管理
         <div style="float:right;">
-          <h3 v-show="kqdownload1 && !groupLeaderFlag" class="kq-export" @click="exportDialog">
+          <h3 v-show="schedule_is_attend == '1'" class="kq-export" >
             <i class="export-icon"></i>
           <router-link to="customizedScheduling" style="color:#6699ee;font-weight:normal;font-size:13px;line-height: 1;"
             class="kaaddminset">排班管理</router-link>
@@ -897,7 +897,9 @@ export default {
         4:'工时短缺',
       },
       tableReplacementCardApproval: [],
-      pushInDialogVisible:false
+      pushInDialogVisible:false,
+      schedule_task_id:0,
+      schedule_is_attend:'0',
     };
   },
   computed: {},
@@ -930,6 +932,8 @@ export default {
       this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
       this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
       this.kqProp = util.getLocalStorage("kqProp");
+      this.schedule_task_id = window.localStorage.getItem("schedule_task_id");
+      this.schedule_is_attend = window.localStorage.getItem("schedule_is_attend");
       this.activeName =
         util.getLocalStorage("activeName") == "kqph" ? "考勤排行" : "按日统计";
       window.localStorage.removeItem("activeName");

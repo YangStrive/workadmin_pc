@@ -665,3 +665,42 @@ export let ajaxPromise = (ajaxParam) => {
     }
 
 }
+
+export let ajaxPromiseJSON = (ajaxParam) => {
+    let headersJson = {
+        "X-Doumi-Agent": "weixinqy"
+    };
+    let param = '?dmclient=pcweb&X-Doumi-Agent=weixinqy'
+    if (window.navigator.onLine == true) {
+        //Online
+        //通过promise实现异步请求
+        return new Promise((resolve, reject) => {
+            
+            $.ajax({
+                url: `${host}${api}${ajaxParam.url}${param}`,
+                xhrFields: {
+                    withCredentials: true
+                },
+                timeout: ajaxParam.timeout || 10000,
+                headers: headersJson,
+                data: JSON.stringify(ajaxParam.data) || {},
+                dataType: ajaxParam.dataType || 'json',
+                type: ajaxParam.type || 'GET',
+                contentType: 'application/json',
+                success: (data) => {
+                    if (data.errno == 104) {
+                        //location.href = 'https://vip.doumi.com/'
+                    }
+                    resolve(data);
+                },
+                error: (xhr, status) => {
+                    reject(xhr, status);
+                }
+            });
+        })
+    } else {
+        //Offline
+        ajaxParam.noNetwork()
+    }
+
+}

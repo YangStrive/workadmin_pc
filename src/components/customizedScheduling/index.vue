@@ -3,7 +3,6 @@
     <div class="kqeditpb_top">
       <breadcrumb>
         <router-link to="kqaddmin" replace>考勤管理</router-link>
-        <router-link to="kqtasklist" replace>考勤规则管理</router-link>
         <router-link to="">排班</router-link>
       </breadcrumb>
     </div>
@@ -47,7 +46,7 @@
         </div>
         <div class="operate_btn">
           <el-button type="primary" size="mini" @click="handleScheduleDataCancel">取消</el-button>
-          <el-button type="primary" size="mini">保存</el-button>
+          <el-button type="primary" size="mini" @click="handleScheduleDataSave">保存</el-button>
         </div>  
       </div>
       <!--排班table-->
@@ -176,7 +175,7 @@ export default {
       //获取用户信息
     this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
     this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
-    this.task_id = util.getLocalStorage("kqpb_task_id");
+    this.task_id = window.localStorage.getItem("schedule_task_id");
     this.schedulingTableHeader = util.getWeekDates()
     
   },
@@ -214,7 +213,7 @@ export default {
         this.kq_week_obj.getTime() + 5 * 24 * 60 * 60 * 1000,
         "yyyy-MM-dd"
       );
-      //this.getAllSchedulingList();
+      this.getAllSchedulingList();
       this.schedulingTableHeader = util.getWeekDates(this.weekFirstDate)
     },
 
@@ -224,7 +223,7 @@ export default {
         console.log("保存固定班次设置",data);
         this.currentSelectedSchedule = data;
       }else{
-        console.log("保存临时班次设置");
+        this.currentSelectedSchedule = data;
       }
 
       let scheduleList = this.schedulingList;
@@ -327,7 +326,7 @@ export default {
       try {
         let res = await util.ajaxPromise(
         { 
-          url: "/attendance/user_schedule",
+          url: "/attendance/user_schedule2",
           type: "GET",
           data: {
             team_id: this.team_id,
@@ -379,6 +378,24 @@ export default {
 
     handleEditDialogVisible(val){
       this.drawerEditVisibility = val;
+    },
+
+    async handleScheduleDataSave(){
+      try {
+        let res = await util.ajaxPromise(
+        { 
+          url: "/attendance/user_schedule/set",
+          type: "POST",
+          data: {
+            team_id: this.team_id,
+            project_id: this.project_id,
+            task_id: this.task_id,
+            date_schedule: this.schedulingList,
+          }
+        });
+      } catch (error) {
+        
+      }
     },
   }
   //beforeCreate () { }, // 生命周期 - 创建之前

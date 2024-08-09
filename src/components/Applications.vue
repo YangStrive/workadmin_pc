@@ -254,6 +254,8 @@ export default {
             this.project_type = res.data.list.project_type;
             window.localStorage.setItem('isNxProject', JSON.stringify(res.data.list.is_nx_project));
             window.localStorage.setItem('current_user_role_id', res.data.list.current_user_role_id);
+            window.localStorage.setItem('schedule_task_id', res.data.list.task_id);
+            window.localStorage.setItem('schedule_is_attend', res.data.list.is_attend ? '1' : '0');
             console.log('set--is_nx_project', res.data.list.is_nx_project)
           }
         },

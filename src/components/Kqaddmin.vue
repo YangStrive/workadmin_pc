@@ -926,18 +926,17 @@ export default {
     },
   },
   methods: {
-    init () {
+    async init () {
       //清空缓存的已选择的小组
       util.setLocalStorage("origin_selected_groups", []);
       this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
       this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
       this.kqProp = util.getLocalStorage("kqProp");
-      this.schedule_task_id = window.localStorage.getItem("schedule_task_id");
-      this.schedule_is_attend = window.localStorage.getItem("schedule_is_attend");
       this.activeName =
         util.getLocalStorage("activeName") == "kqph" ? "考勤排行" : "按日统计";
       window.localStorage.removeItem("activeName");
       //获取权限;
+      await this.getOver()
       this.getpermission();
       // console.log(this.kqProp)
       if (this.kqProp) {
@@ -1000,6 +999,23 @@ export default {
           });
         }
       });
+    },
+    async  getOver(){
+      //"/project/overview"
+      let res = await util.ajaxPromise({
+        url: "/project/overview",
+        type: "GET",
+        data: {
+          team_id: this.team_id,
+          project_id: this.project_id,
+        }
+      })
+
+      if(res.errno == 0){
+        this.schedule_task_id = res.data.list.task_id;
+        this.schedule_is_attend = res.data.list.is_attend;
+        window.localStorage.setItem("schedule_task_id",res.data.list.task_id);
+      }
     },
     //考勤--按日统计
     getTableDataDay (exp) {

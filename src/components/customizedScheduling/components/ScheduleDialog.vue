@@ -207,7 +207,7 @@ export default {
     //班次设置保存
 		handleSaveSchedule(){
       if(this.activeScheduleName == 'fixed'){
-        this.saveScheduleData(this.temporaryStorage);
+        this.saveScheduleData(this.temporaryStorage,'fixed');
         this.handleDrawerClose();
       }
 
@@ -229,6 +229,7 @@ export default {
       }
     },
 
+    //保存临时班次
     async saveTemporarySchedule(){
       try {
         let schedule_list = [];
@@ -273,11 +274,7 @@ export default {
         });
 
         if(res.errno == 0 ){
-          this.$message({
-            message: '保存成功',
-            type: 'success'
-          });
-          this.saveScheduleData(res.data.schedule_list);
+          this.saveScheduleData(res.data.schedule_list,'temp');
           this.handleDrawerClose();
         }
         

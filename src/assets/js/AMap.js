@@ -7,6 +7,7 @@ export default function MapLoader() {
       var script2 = document.createElement("script");
       script.type = "text/javascript";
       script.async = true;
+      
       script.src =
         "https://webapi.amap.com/maps?v=1.4.15&callback=initAMap&key=e467eaddd651aca7555ab44e820468a5";
       script.onerror = reject;

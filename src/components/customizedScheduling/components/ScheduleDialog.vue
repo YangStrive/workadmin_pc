@@ -159,6 +159,7 @@ export default {
 
     init(){
       this.activeScheduleName = this.scheduleType;
+      return;
       console.log("this.currentCellSchedule",this.currentCellSchedule);
       if(this.scheduleType == 'fixed'){
         this.temporaryStorage = this.currentCellSchedule || {};

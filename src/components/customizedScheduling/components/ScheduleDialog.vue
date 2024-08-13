@@ -16,7 +16,7 @@
 					<li
 					class="schedule-item"
 					v-for="(item, index) in fixedSchedules"
-					:class="[ temporaryStorage.schedule_id == item.schedule_id ? 'active-schedule' : '','colorblock_item_' + index]"
+					:class="[ temporaryStorage.schedule_id == item.schedule_id ? 'active-schedule' : '','colorblock_item_' + item.schedule_name]"
 					:key="index"
 					@click="handleScheduleItemClick(item,index)"
 					>
@@ -159,22 +159,6 @@ export default {
 
     init(){
       this.activeScheduleName = this.scheduleType;
-      return;
-      console.log("this.currentCellSchedule",this.currentCellSchedule);
-      if(this.scheduleType == 'fixed'){
-        this.temporaryStorage = this.currentCellSchedule || {};
-      }
-
-      if(this.scheduleType == 'temp'){
-        this.temporarySchedule.workTimetList = this.currentCellSchedule || [];
-
-        if(this.temporarySchedule.workTimetList.length == 1){
-          this.temporarySchedule.rest =  this.currentCellSchedule[0].rest_start_time ? 1 : 2;
-          this.temporarySchedule.rest_start_time = this.currentCellSchedule[0].rest_start_time;
-          this.temporarySchedule.rest_end_time = this.currentCellSchedule[0].rest_end_time;
-
-        }
-      }
     },
 
     //获取所有固定班次
@@ -291,6 +275,17 @@ export default {
       let isCross = false;
       let isRepeat = false;
       let isEndBeforeStart = false;
+      //检查工作时间不能为空
+      for(let i = 0; i < workTimetListLength; i++){
+        if(!workTimetList[i].start_time || !workTimetList[i].end_time){
+          this.$message({
+            message: '工作时间不能为空',
+            type: 'warning'
+          });
+          return false;
+        }
+      }
+
       for(let i = 0; i < workTimetListLength; i++){
         for(let j = i + 1; j < workTimetListLength; j++){
           if(workTimetList[i].start_time < workTimetList[j].end_time && workTimetList[i].end_time > workTimetList[j].start_time){
@@ -393,7 +388,7 @@ export default {
      // 点击排班弹框中的班次
 		handleScheduleItemClick(item,index) {
       console.log("点击排班弹框中的班次", item);
-      this.temporaryStorage = {...item,style:index};
+      this.temporaryStorage = {...item,style:item.schedule_name};
     },
 
     getFormattedTime(date) {

@@ -39,7 +39,7 @@
               class="selected-schedlu-info"  
               v-for="(item,index) in currentSelectedSchedule"
               :key="index"
-              :class="['colorblock_item_' + item.style]">
+              :class="['colorblock_item_' + item.schedule_name]">
               <p>{{item.schedule_name}}</p>
               <p>{{item.start_time}}-{{ item.start_time }}</p>
             </div>
@@ -102,7 +102,7 @@
                     <p v-if="currentSelectedSchedule.length == 1">{{sitem.schedule_name }}</p>
                     <p v-if="sitem.start_time">{{sitem.start_time }}-{{ sitem.end_time }}</p>
                     <p v-if="sitem.rest_start_time">{{sitem.rest_start_time }}-{{ sitem.rest_end_time }} 休息</p>
-                    <p v-if="sitem.work_hours && currentSelectedSchedule.length == 1">{{ sitem.work_hours }}</p>
+                    <p v-if="sitem.work_hours">{{ sitem.work_hours }}</p>
                   </div>
                 </div>
               </template>
@@ -201,14 +201,9 @@ export default {
       showSchedulingBtn: false, //是否显示排班按钮
       schedulingList:[],//排班所有数据
       schedulingTableHeader: [],//排班表头
-
       drawerVisibility: false,
       showSchedulingBtn:false,
       activeScheduleName: "fixed",//当前选中的班次类型
-
-      //临时班次
-
-
       currentSelectedSchedule:[],
       drawerEditVisibility: false,
       scheduleType: "fixed",
@@ -220,7 +215,6 @@ export default {
         user_name: "",
         schedule_list: [],
       },
-
       editInfo: {
         user_ids: "",
         date: "",
@@ -307,6 +301,7 @@ export default {
         for(let key in scheduleList[i]){
           if(scheduleList[i][key].currentCellSelected){
             scheduleList[i][key].scheduleList = this.currentSelectedSchedule;
+            scheduleList[i][key].style = data.style;
           }
         }
       }
@@ -315,20 +310,25 @@ export default {
     },
 
     //保存编辑班次设置
-    handleEditSaveScheduleData(data){
-      console.log("保存编辑班次设置");
+    handleEditSaveScheduleData(data,type){
+      let schedule = type == "fixed" ? [data] : data;
       let scheduleList = this.schedulingList;
-
+      //找到当前编辑的用户，将编辑的班次设置为当前选择的班次，根据editInfo中的user_id和date
       for(let i = 0; i < scheduleList.length; i++){
-        if(scheduleList[i].user_id == this.editUseId){
-          scheduleList[i][this.editUseColumn].scheduleList = [data];
-          scheduleList[i][this.editUseColumn].style = data.style;
-          scheduleList[i][this.editUseColumn].currentCellSelected = true;
-          break;
+        if(scheduleList[i].user_id == this.editInfo.user_ids){
+          for(let key in scheduleList[i]){
+            if(scheduleList[i][key].date == this.editInfo.date){
+              scheduleList[i][key].scheduleList = schedule;
+              scheduleList[i][key].style = data.style;
+              scheduleList[i][key].currentCellSelected = true;
+              break;
+            }
+          }
         }
       }
 
       this.scheduleList = scheduleList;
+      this.scheduleDetailDialogVisible = false;
 
     },
 
@@ -373,19 +373,6 @@ export default {
         };
 
         return false;
-        this.editUseId = userId;
-        this.editUseColumn = columnProperty;
-
-        this.scheduleType = row[columnProperty].scheduleList[0].type == 2 ? "temp" : "fixed";
-        if(this.scheduleType == "fixed"){
-          this.currentCellSchedule = row[columnProperty].scheduleList[0];
-          console.log(this.currentCellSchedule,888);
-        }else{
-          this.currentCellSchedule = row[columnProperty].scheduleList;
-        }
-
-        this.drawerEditVisibility = true;
-        return false;
       }
 
       console.log(column)
@@ -398,7 +385,7 @@ export default {
           scheduleList[i][columnProperty].currentCellSelected = !scheduleList[i][columnProperty].currentCellSelected;
           if(currentSelectedSchedule.length != 0 && scheduleList[i][columnProperty].currentCellSelected){
             scheduleList[i][columnProperty].scheduleList = currentSelectedSchedule;
-           //scheduleList[i][columnProperty].style = currentSelectedSchedule.style;
+            scheduleList[i][columnProperty].style = currentSelectedSchedule[0].style;
           }
 
           if(!scheduleList[i][columnProperty].currentCellSelected){
@@ -457,6 +444,9 @@ export default {
                 disabled: item['date_schedule'][i].date + 86400  < currnetTimer ? true : false,//
                 date: item['date_schedule'][i].date,
               };
+              if(item['date_schedule'][i].schedule[0]){
+                obj['day'+(i+1)].style = item['date_schedule'][i].schedule[0].schedule_name;
+              }
             }
             scheduleData.push(obj);
           });

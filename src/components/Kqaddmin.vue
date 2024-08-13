@@ -4,7 +4,7 @@
       <h2>考勤管理
         <div style="float:right;">
           <h3 v-show="schedule_is_attend == '1'" class="kq-export" >
-            <i class="export-icon"></i>
+            <i class="createico_svg"></i>
           <router-link to="customizedScheduling" style="color:#6699ee;font-weight:normal;font-size:13px;line-height: 1;"
             class="kaaddminset">排班管理</router-link>
           </h3>

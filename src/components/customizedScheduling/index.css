@@ -1154,3 +1154,25 @@
   font-weight: 400;
   margin-right: 12px;
 }
+
+.schedule-detail {
+  padding: 24px;
+}
+.schedule-detail-item {
+  padding: 6px 0;
+}
+.schedule-detail-item span {
+  font-size: 14px;
+}
+h3.schedule-detail-item-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 12px 0;
+}
+.schedule-detail-item-main {
+  padding: 12px;
+  background: #cadcff;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  color: #333;
+}

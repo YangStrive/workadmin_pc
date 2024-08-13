@@ -119,12 +119,55 @@
       :drawerVisibility="drawerVisibility"
     />
     <ScheduleDialog
+    />
+    <ScheduleDialogEdit
       :closeDialog="handleEditDialogVisible"
       :saveScheduleData="handleEditSaveScheduleData"
       :drawerVisibility="drawerEditVisibility"
-      :scheduleType="scheduleType"
-      :currentCellSchedule="currentCellSchedule"
+      :task_id="task_id"
+      :project_id="project_id"
+      :team_id="team_id"
+      :start_date="weekFirstDate"
+      :editInfo="editInfo"
     />
+
+    <el-dialog
+      title="排班详情"
+      :visible.sync="scheduleDetailDialogVisible"
+		  size="tiny"
+      center>
+      <div class="schedule-detail">
+        <div class="schedule-detail-item">
+          <span>姓名：</span>
+          <span>{{scheduleDetail.user_name}}</span>
+          
+        </div>
+        <div>
+          <h3 class="schedule-detail-item-title">班次信息 
+            <button type="button" class="el-button el-button--primary el-button--mini" @click="handleScheduleDetailEditBtn">修改班次</button>
+          </h3>
+        </div>
+        <div class="schedule-detail-item-main" v-for="(item,index) in scheduleDetail.scheduleList">
+          <div class="schedule-detail-item">
+            <span>班次名称：</span>
+            <span >{{item.schedule_name}}</span>
+          </div>
+          <div class="schedule-detail-item" v-if="item.start_time">
+            <span>上班时间：</span>
+            <span>{{item.start_time}}-{{item.end_time}}</span>
+          </div>
+          <div class="schedule-detail-item" v-if="item.rest_start_time">
+            <span>休息时间：</span>
+            <span>{{item.rest_start_time}}-{{item.rest_end_time}}</span>
+          </div>
+          <div class="schedule-detail-item" v-if="item.work_hours">
+            <span>工作时长：</span>
+            <span>{{item.work_hours}}</span>
+          </div>
+        </div>
+        
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -134,12 +177,14 @@
 
 import breadcrumb from "@/components/common/breadcrumb";
 import ScheduleDialog from "./components/ScheduleDialog"
+import ScheduleDialogEdit from "./components/ScheduleDialogEdit"
 import * as util from "@/assets/js/util.js";
 
 export default {
   components: {
     breadcrumb,
-    ScheduleDialog
+    ScheduleDialog,
+    ScheduleDialogEdit
   },
   data () {
     return {
@@ -168,10 +213,18 @@ export default {
       drawerEditVisibility: false,
       scheduleType: "fixed",
       currentCellSchedule:{},
-      editUseId: "",
       editUseColumn: "",
-      deteleStatus: false,
+      deteleStatus: false,//是否进入删除状态 
+      scheduleDetailDialogVisible: false,
+      scheduleDetail: {
+        user_name: "",
+        schedule_list: [],
+      },
 
+      editInfo: {
+        user_ids: "",
+        date: "",
+      },
     }
   },
   // 监听属性 类似于data概念
@@ -311,6 +364,14 @@ export default {
       let currentSelectedSchedule = this.currentSelectedSchedule;
 
       if(row[columnProperty].scheduleList.length > 0 && !row[columnProperty].currentCellSelected){
+        this.scheduleDetailDialogVisible = true;
+        this.scheduleDetail.scheduleList = row[columnProperty].scheduleList;
+        this.scheduleDetail.user_name = row.user_name;
+        this.editInfo = {
+          user_ids: userId,
+          date: row[columnProperty].date,
+        };
+
         return false;
         this.editUseId = userId;
         this.editUseColumn = columnProperty;
@@ -424,10 +485,8 @@ export default {
     },
 
     handleScheduleDataSave(){
-      console.log("保存排班数据");
-      console.log(this.schedulingList);
       //遍历scheduleList,新生成一个数组，格式如下[{user_id:'11',date:'123233323',schedule_ids:[1,2,3,4],position_id:''}]
-
+      let setCellNum = 0;
       let scheduleData = [];
       this.schedulingList.forEach((item) => {
         for(let key in item){
@@ -440,6 +499,7 @@ export default {
             };
 
             item[key].scheduleList.forEach((sitem) => {
+              setCellNum++;
               obj.schedule_ids.push(sitem.schedule_id);
             });
             obj.schedule_ids = obj.schedule_ids.join(",");
@@ -447,6 +507,14 @@ export default {
           }
         }
       });
+
+      if(setCellNum == 0){
+        this.$message({
+          message: "未设置排班",
+          type: "warning",
+        });
+        return false;
+      }
       
       if(scheduleData.length == 0){
         this.$message({
@@ -557,6 +625,10 @@ export default {
       this.getAllSchedulingList();
       this.deteleStatus = false;
       
+    },
+
+    handleScheduleDetailEditBtn(){
+      this.drawerEditVisibility = true;
     }
   }
   //beforeCreate () { }, // 生命周期 - 创建之前

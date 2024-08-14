@@ -82,7 +82,7 @@
             v-for="(item, index) in schedulingTableHeader"
             :prop="item.key"
             :key="index"
-            :label="item.date + ' ' + item.day"
+            :label="item.date + ' （周' + item.day + '）'"
             min-width="101"
           >
             <template slot-scope="scope">
@@ -368,7 +368,9 @@ export default {
       let scheduleList = this.schedulingList;
       let currentSelectedSchedule = this.currentSelectedSchedule;
 
+      //判断是否为编辑当前用户的排班
       if(row[columnProperty].scheduleList.length > 0 && !row[columnProperty].currentCellSelected){
+        return false;
         this.scheduleDetailDialogVisible = true;
         this.scheduleDetail.scheduleList = row[columnProperty].scheduleList;
         this.scheduleDetail.user_name = row.user_name;

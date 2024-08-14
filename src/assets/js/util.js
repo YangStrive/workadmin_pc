@@ -619,7 +619,7 @@ export const getWeekDates = (date) => {
         const date = new Date(monday);
         date.setDate(monday.getDate() + i);
         weekDates.push({
-            date:date.getDate(),
+            date:date.getMonth() + 1 + '-' + date.getDate(),
             day: dayChinese[i],
             key:'day'+(i+1)
         });

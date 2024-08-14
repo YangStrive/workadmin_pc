@@ -100,10 +100,6 @@ export default {
       type: String,
       default: 'fixed'
     },
-    fixedSchedules: {
-      type: Array,
-      default: () => []
-    },
     closeDialog: {
       type: Function,
       default: () => {}
@@ -134,6 +130,7 @@ export default {
 	data() {
 		return {
       activeScheduleName: 'fixed',
+      fixedSchedules: [],
       temporarySchedule: {
         schedule_name: '',
         start_time: '',
@@ -219,6 +216,7 @@ export default {
       try {
         let schedule_list = [];
 
+        //临时班次只有一个工作时间
         if(this.temporarySchedule.workTimetList.length == 1){
           schedule_list.push({
             start_time:  this.getFormattedTime(this.temporarySchedule.workTimetList[0].start_time),
@@ -232,6 +230,7 @@ export default {
           })
 
         }else{
+          //临时班次有多个工作时间
           this.temporarySchedule.workTimetList.forEach(item => {
               schedule_list.push({
               start_time: this.getFormattedTime(item.start_time),

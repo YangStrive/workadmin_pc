@@ -649,40 +649,6 @@
   color: #ffffff;
   text-align: center;
 }
-.customized-scheduling .colorblock_item_A,
-.colorblock_item_AA {
-  background-color: #83aef2;
-}
-.customized-scheduling .colorblock_item_B,
-.colorblock_item_BB {
-  background-color: #fea560;
-}
-.customized-scheduling .colorblock_item_C,
-.colorblock_item_CC {
-  background-color: #8bd574;
-}
-.customized-scheduling .colorblock_item_D,
-.colorblock_item_DD {
-  background-color: #fa876d;
-}
-.customized-scheduling .colorblock_item_E {
-  background-color: #cd88df;
-}
-.customized-scheduling .colorblock_item_F {
-  background-color: #fcbd41;
-}
-.customized-scheduling .colorblock_item_G {
-  background-color: #4ad6d1;
-}
-.customized-scheduling .colorblock_item_H {
-  background-color: #b7de30;
-}
-.customized-scheduling .colorblock_item_I {
-  background-color: #a590f3;
-}
-.customized-scheduling .colorblock_item_J {
-  background-color: #a09bb4;
-}
 /*分页*/
 .customized-scheduling .kqeditpb_main .pb_edit_table .pagination_wrap {
   height: 28px;
@@ -953,7 +919,7 @@
 
 .customized-scheduling
   .kqeditpb_main .select-border-style{
-  border: 1px solid #6699ee !important;
+  border: 2px solid #0462ff !important;
 }
 
 .scheduling-btn{
@@ -972,6 +938,7 @@
   cursor: pointer;
   padding: 8px 0;
   border-radius: 6px;
+  background: #77a3ab;
 }
 
 .dialog-schedule-main .schedule-item .colorblock{
@@ -1092,7 +1059,8 @@
     justify-content: center;
     flex-direction: column;
     overflow-y: auto;
-    padding: 2px 0;
+    padding: 1px 0;
+    border-radius: 4px;
   }
 
 .cell-schedule-box p{
@@ -1110,29 +1078,83 @@
   opacity: 0.8;
 }
 
-.colorblock_item_A{
+.customized-scheduling .colorblock_item_A{
   background-color: #83aef2;
 }
-.colorblock_item_B{
+.customized-scheduling .colorblock_item_B{
   background-color: #fea560;
 }
-.colorblock_item_C{
+.customized-scheduling .colorblock_item_C{
   background-color: #8bd574;
 }
-.colorblock_item_D{
+.customized-scheduling .colorblock_item_D{
   background-color: #fa876d;
 }
-.colorblock_item_E{
+.customized-scheduling .colorblock_item_E{
   background-color: #cd88df;
 }
-.colorblock_item_F{
+.customized-scheduling .colorblock_item_F{
   background-color: #fcbd41;
 }
-.colorblock_item_G{
+.customized-scheduling .colorblock_item_G{
   background-color: #4ad6d1;
 }
-.colorblock_item_H{
+.customized-scheduling .colorblock_item_H{
   background-color: #b7de30;
+}
+.customized-scheduling .colorblock_item_I{
+  background-color: #a590f3;
+}
+.customized-scheduling .colorblock_item_J{
+  background-color: #a09bb4;
+}
+.customized-scheduling .colorblock_item_K{
+  background-color: #83aef2;
+}
+.customized-scheduling .colorblock_item_L{
+  background-color: #fea560;
+}
+.customized-scheduling .colorblock_item_M{
+  background-color: #33FF57;
+}
+.customized-scheduling .colorblock_item_N{
+  background-color: #FF5733;
+}
+.customized-scheduling .colorblock_item_O{
+  background-color: #3357FF;
+}
+.customized-scheduling .colorblock_item_P{
+  background-color: #FF33A1;
+}
+.customized-scheduling .colorblock_item_Q{
+  background-color: #A133FF;
+}
+.customized-scheduling .colorblock_item_R{
+  background-color: #33FFA1;
+}
+.customized-scheduling .colorblock_item_S{
+  background-color: #57FF33;
+}
+.customized-scheduling .colorblock_item_T{
+  background-color: #5733FF;
+}
+.customized-scheduling .colorblock_item_U{
+  background-color: #FF33FF;
+}
+.customized-scheduling .colorblock_item_V{
+  background-color: #33FF33;
+}
+.customized-scheduling .colorblock_item_W{
+  background-color: #FF3333;
+}
+.customized-scheduling .colorblock_item_X{
+  background-color: #3333FF;
+}
+.customized-scheduling .colorblock_item_Y{
+  background-color: #33FFFF;
+}
+.customized-scheduling .colorblock_item_Z{
+  background-color: #FFFF33;
 }
 .schedule-list-item{
   flex-wrap: wrap;

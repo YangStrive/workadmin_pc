@@ -88,8 +88,7 @@
 </template>
 <script>
 
-import { ajaxPromise, getLocalStorage, ajaxPromiseJSON } from "@/assets/js/util.js";
-import { t } from "element-ui/lib/locale";
+import { ajaxPromise, getLocalStorage } from "@/assets/js/util.js";
 
 export default {
 	props: {
@@ -191,8 +190,11 @@ export default {
         if(res.errno == 0 ){
           let schedule_list = res.data[0].date_schedule;
           schedule_list.forEach((item) => {
+            //找出选择的日期的排班信息
             if(item.date == this.editInfo.date){
               let schedule = item.schedule;
+
+              //固定或临时班次
               if(schedule[0].type == 1){
                 this.activeScheduleName = 'fixed';
                 this.temporaryStorage = schedule[0];
@@ -200,10 +202,11 @@ export default {
                 this.activeScheduleName = 'temp';
                 this.temporarySchedule.workTimetList = schedule;
 
+                //临时班次需要对班次信息分开处理
                 if(schedule.length == 1){
-                  this.temporarySchedule.rest_start_time = schedule[0].rest_start_time;
-                  this.temporarySchedule.rest_end_time = schedule[0].rest_end_time;
-                  this.temporarySchedule.rest = 1;
+                  this.temporarySchedule.rest_start_time = new Date(2024,8,1, schedule[0].rest_start_time.split(':')[0], schedule[0].rest_start_time.split(':')[1]);
+                  this.temporarySchedule.rest_end_time = new Date(2024,8,1, schedule[0].rest_end_time.split(':')[0], schedule[0].rest_end_time.split(':')[1]);
+                  this.temporarySchedule.rest = '1';
                   this.temporarySchedule.workTimetList = [
                     {
                       start_time: new Date(2024,8,1, schedule[0].start_time.split(':')[0], schedule[0].start_time.split(':')[1]),
@@ -219,7 +222,7 @@ export default {
                     })
                   })
                   this.temporarySchedule.workTimetList = workTimetList;
-                  this.temporarySchedule.rest = 2;
+                  this.temporarySchedule.rest = '2';
                 }
               }
             }
@@ -264,10 +267,19 @@ export default {
     },
 
     //班次设置保存
-		handleSaveSchedule(){
+		async handleSaveSchedule(){
       if(this.activeScheduleName == 'fixed'){
-        this.saveScheduleData(this.temporaryStorage,'fixed');
-        this.handleDrawerClose();
+        let resSave = await this.submitScheduleData([{
+          user_id: this.editInfo.user_ids,
+          date: this.editInfo.date,
+          schedule_ids: this.temporaryStorage.schedule_id,
+          position_id:'0'
+        }])
+
+        if(resSave){
+          this.saveScheduleData(this.temporaryStorage,'fixed');
+          this.handleDrawerClose();
+        }
       }
 
       if(this.activeScheduleName == 'temp'){
@@ -333,12 +345,52 @@ export default {
         });
 
         if(res.errno == 0 ){
-          this.saveScheduleData(res.data.schedule_list,'temp');
-          this.handleDrawerClose();
+          console.log("res",res.data.schedule_list);
+          let schedule_ids = res.data.schedule_list.map(item => item.schedule_id);
+
+          let resSave = await this.submitScheduleData([{
+            user_id: this.editInfo.user_ids,
+            date: this.editInfo.date,
+            schedule_ids: schedule_ids.join(','),
+            position_id:'0'
+          }])
+
+          if(resSave){
+            this.saveScheduleData(res.data.schedule_list,'temp');
+            this.handleDrawerClose();
+          }
         }
         
       } catch (error) {
-        
+        throw error
+      }
+    },
+
+    //保存排班数据
+    async submitScheduleData(scheduleData){
+      try {
+        let res = await ajaxPromise(
+        { 
+          url: "/attendance/user_schedule/set",
+          type: "POST",
+          data: {
+            team_id: this.team_id,
+            project_id: this.project_id,
+            task_id: this.task_id,
+            date_schedule: scheduleData,
+          }
+        });
+
+        if(res.errno == 0 ){
+          this.$message({
+            message: "保存成功",
+            type: "success",
+          });
+
+          return true;
+        }
+      } catch (error) {
+        throw error
       }
     },
 

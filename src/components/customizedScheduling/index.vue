@@ -140,14 +140,17 @@
         <div class="schedule-detail-item">
           <span>姓名：</span>
           <span>{{scheduleDetail.user_name}}</span>
-          
+        </div>
+        <div class="schedule-detail-item">
+          <span>排班日期：</span>
+          <span>{{scheduleDetail.dateString}} 星期{{ scheduleDetail.day }}</span>
         </div>
         <div>
           <h3 class="schedule-detail-item-title">班次信息 
             <button type="button" class="el-button el-button--primary el-button--mini" @click="handleScheduleDetailEditBtn">修改班次</button>
           </h3>
         </div>
-        <div class="schedule-detail-item-main" v-for="(item,index) in scheduleDetail.scheduleList">
+        <div class="schedule-detail-item-main" v-for="(item,index) in scheduleDetail.scheduleList" :key="index">
           <div class="schedule-detail-item">
             <span>班次名称：</span>
             <span >{{item.schedule_name}}</span>
@@ -214,6 +217,8 @@ export default {
       scheduleDetail: {
         user_name: "",
         schedule_list: [],
+        dateString: "",
+        day: "",
       },
       editInfo: {
         user_ids: "",
@@ -320,7 +325,7 @@ export default {
             if(scheduleList[i][key].date == this.editInfo.date){
               scheduleList[i][key].scheduleList = schedule;
               scheduleList[i][key].style = data.style;
-              scheduleList[i][key].currentCellSelected = true;
+              scheduleList[i][key].currentCellSelected = false;
               break;
             }
           }
@@ -367,6 +372,9 @@ export default {
         this.scheduleDetailDialogVisible = true;
         this.scheduleDetail.scheduleList = row[columnProperty].scheduleList;
         this.scheduleDetail.user_name = row.user_name;
+        this.scheduleDetail.dateString = util.getLocalTime(row[columnProperty].date *1000, "yyyy-MM-dd");
+        this.scheduleDetail.day = column.label.split(" ")[1];
+
         this.editInfo = {
           user_ids: userId,
           date: row[columnProperty].date,

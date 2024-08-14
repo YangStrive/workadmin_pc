@@ -224,6 +224,8 @@ export default {
         user_ids: "",
         date: "",
       },
+      schedule_current_user_role_id: "",
+      group_ids: "",
     }
   },
   // 监听属性 类似于data概念
@@ -249,6 +251,7 @@ export default {
     this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
     this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
     this.task_id = window.localStorage.getItem("schedule_task_id");
+    this.schedule_current_user_role_id = window.localStorage.getItem("schedule_current_user_role_id");
     this.schedulingTableHeader = util.getWeekDates()
     
   },
@@ -260,8 +263,12 @@ export default {
   methods: {
     //初始化
     async init() {
-      this.getCurrentWeekFirstDate();
-      let m = this.getAllSchedulingList();
+    this.getCurrentWeekFirstDate();
+
+    if(this.schedule_current_user_role_id == 3){
+      await this.getAllGroupIds();
+    }
+    this.getAllSchedulingList();
     },
 
     //获取当前周的周一日期
@@ -418,6 +425,33 @@ export default {
     },
 
     handleHeaderClick(){
+
+    },
+
+    async getAllGroupIds(){
+      let group_ids = [];
+      try {
+        let res = await util.ajaxPromise(
+        { 
+          url: "/group/select_list",
+          type: "GET",
+          data: {
+            team_id: this.team_id,
+            project_id: this.project_id,
+            group_id: 0,
+          }
+        });
+
+        if(res.errno == 0 ){
+          res.data.forEach((item) => {
+            group_ids.push(item.id);
+          });
+
+          this.group_ids = group_ids.join(",");
+        }
+      } catch (error) {
+        
+      }
 
     },
 

@@ -1015,6 +1015,7 @@ export default {
         this.schedule_task_id = res.data.list.task_id;
         this.schedule_is_attend = res.data.list.is_attend;
         window.localStorage.setItem("schedule_task_id",res.data.list.task_id);
+        window.localStorage.setItem("schedule_current_user_role_id",res.data.list.current_user_role_id);
       }
     },
     //考勤--按日统计

@@ -143,14 +143,14 @@
         </div>
         <div class="schedule-detail-item">
           <span>排班日期：</span>
-          <span>{{scheduleDetail.dateString}} 星期{{ scheduleDetail.day }}</span>
+          <span>{{scheduleDetail.dateString}} {{ scheduleDetail.day }}</span>
         </div>
         <div>
           <h3 class="schedule-detail-item-title">班次信息 
             <button type="button" class="el-button el-button--primary el-button--mini" @click="handleScheduleDetailEditBtn">修改班次</button>
           </h3>
         </div>
-        <div class="schedule-detail-item-main" v-for="(item,index) in scheduleDetail.scheduleList" :key="index">
+        <div class="schedule-detail-item-main" v-for="(item,index) in scheduleDetail.scheduleList" :key="index" :class="['colorblock_item_'+item.schedule_name]">
           <div class="schedule-detail-item">
             <span>班次名称：</span>
             <span >{{item.schedule_name}}</span>
@@ -219,6 +219,7 @@ export default {
         schedule_list: [],
         dateString: "",
         day: "",
+        
       },
       editInfo: {
         user_ids: "",
@@ -377,7 +378,7 @@ export default {
 
       //判断是否为编辑当前用户的排班
       if(row[columnProperty].scheduleList.length > 0 && !row[columnProperty].currentCellSelected){
-        return false;
+        //return false;
         this.scheduleDetailDialogVisible = true;
         this.scheduleDetail.scheduleList = row[columnProperty].scheduleList;
         this.scheduleDetail.user_name = row.user_name;

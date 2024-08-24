@@ -3,7 +3,7 @@ import $ from 'jquery'
 
 //export const host = '//work.doumi.com'
 export const host = '';
-// export const host = '//saas-test.doumi.com'   
+ //export const host = '//saas-test.doumi.com'
 
 //请求B端接口host
 // export const hostB = 'http://vip.corp.doumi.com'
@@ -15,7 +15,7 @@ export const hostB = '//vip.doumi.com'
  * @param {function} online  offline  参数
  * @example
  *      util.isOnline(() => {
- *          //有网时的回调      
+ *          //有网时的回调
  *      }, () => {
  *          //无网时的回调
  *      })
@@ -346,7 +346,7 @@ export let getSessionStorage = (key) => {
     }
     return null
 }
-/* 
+/*
 *  时间格式化————针对新建项目中会有开始与结束时间
 *  start_date：开始时间
 *  end_date: 结束时间
@@ -619,7 +619,7 @@ export const getWeekDates = (date) => {
         const date = new Date(monday);
         date.setDate(monday.getDate() + i);
         weekDates.push({
-            date:date.getMonth() + 1 + '-' + date.getDate(),
+            date:date.getDate(),
             day: dayChinese[i],
             key:'day'+(i+1)
         });
@@ -637,7 +637,7 @@ export let ajaxPromise = (ajaxParam) => {
         //Online
         //通过promise实现异步请求
         return new Promise((resolve, reject) => {
-            
+
             $.ajax({
                 url: `${host}${api}${ajaxParam.url}${param}`,
                 xhrFields: {
@@ -675,7 +675,7 @@ export let ajaxPromiseJSON = (ajaxParam) => {
         //Online
         //通过promise实现异步请求
         return new Promise((resolve, reject) => {
-            
+
             $.ajax({
                 url: `${host}${api}${ajaxParam.url}${param}`,
                 xhrFields: {

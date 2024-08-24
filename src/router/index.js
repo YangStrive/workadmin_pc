@@ -377,11 +377,22 @@ export default new Router({
 					name: 'OutgoingManagement',
 					component: (resolve) => require(['@/components/OutgoingManagement'], resolve)
 				},
+				{
+				path: 'KqConfirminfo',
+				name: 'KqConfirminfo',
+				component: (resolve) => require(['@/components/KqConfirmInfo'], resolve)
+				},
 				//新版打卡
 				{
 					path:'customizedScheduling',
 					name:'customizedScheduling',
 					component:(resolve) => require(['@/components/customizedScheduling'], resolve)
+				},
+				//账单管理和补贴
+				{
+					path: 'billAllowanceManage',
+					name: 'billAllowanceManage',
+					component: (resolve) => require(['@/components/billAllowanceManage'], resolve)
 				},
 			]
 		},

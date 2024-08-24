@@ -517,6 +517,32 @@
           <el-radio class="radio" v-model="ruleForm.is_allow_punch" :label="1">允许</el-radio>
           <el-radio class="radio" v-model="ruleForm.is_allow_punch" :label="0">不允许</el-radio>
         </el-form-item>
+        <el-form-item label="补卡次数" prop="punchNumLimit" v-if="ruleForm.is_allow_punch==1">
+          <el-radio class="radio" v-model="ruleForm.punchNumLimit" :label="0">不限制</el-radio>
+          <el-radio class="radio" v-model="ruleForm.punchNumLimit" :label="1">限制</el-radio>
+
+        </el-form-item>
+
+        <el-form-item  prop="punch_num" v-if="ruleForm.punchNumLimit==1">
+
+          <el-select v-model="
+                  ruleForm.punch_limit
+                " placeholder="请选择" style="width: 100px">
+            <el-option label="每周" value="1"></el-option>
+            <el-option label="每月" value="2"></el-option>
+          </el-select>
+          每人可提交 <el-input v-model="ruleForm.punch_num" placeholder="请输入" style="width: 100px"></el-input>天内的补卡
+        </el-form-item>
+        <el-form-item label="补卡时间" prop="punchTimeLimit" v-if="ruleForm.is_allow_punch==1">
+          <el-radio class="radio" v-model="ruleForm.punchTimeLimit" :label="0">不限制</el-radio>
+          <el-radio class="radio" v-model="ruleForm.punchTimeLimit" :label="1">限制</el-radio>
+
+        </el-form-item>
+        <el-form-item  prop="punch_time" v-if="ruleForm.punchTimeLimit==1">
+          可申请过去<el-input v-model="ruleForm.punch_time" placeholder="请输入" style="width: 100px"></el-input>天内的补卡
+        </el-form-item>
+
+
         <el-form-item label="" prop="" style="margin-bottom: 67px">
           <el-button type="primary" @click="validateKqSet">{{
             isNewTask && (ruleForm.kq_type == 2 || ruleForm.kq_type == 3)
@@ -746,6 +772,11 @@ export default {
         is_allow_punch: 0, // 是否允许补卡
         // punch_range: 0, // 考勤范围
         punch_type:0, //打卡方式 0：GPS 1：WIFI
+        punchNumLimit:0,
+        punchTimeLimit:0,
+        punch_time:"",
+        punch_limit:'',
+        punch_num:'',
       },
       rules: {
         name: [{ validator: checkName, required: true, trigger: "blur" }],
@@ -1166,8 +1197,19 @@ export default {
             //考勤通知notice_type
             this.ruleForm.kq_notice = Number(res.data.notice_type);
             this.ruleForm.is_allow_punch = parseFloat(res.data.is_allow_punch)
+
              // 打卡方式
             this.ruleForm.punch_type = parseFloat(res.data.punch_type)
+            if(Number(res.data.punch_time)>0){
+              this.ruleForm.punchTimeLimit =1;
+            }
+            if(Number(res.data.punch_num) >0){
+              this.ruleForm.punchNumLimit =1;
+            }
+
+            this.ruleForm.punch_time = Number(res.data.punch_time)
+            this.ruleForm.punch_num = Number(res.data.punch_num)
+            this.ruleForm.punch_limit = res.data.punch_limit;
           }
         },
         error: (xhr, status) => { },
@@ -1287,6 +1329,9 @@ export default {
         require_field: this.require_field,
         notice_type: this.ruleForm.kq_notice,
         is_allow_punch: parseFloat(this.ruleForm.is_allow_punch),
+        punch_time:Number(this.ruleForm.punch_time),
+        punch_limit:Number(this.ruleForm.punch_limit),
+        punch_num:Number(this.ruleForm.punch_num),
         checkparticapant: 1,
         mac: [],
         punch_type:this.ruleForm.punch_type
@@ -1329,7 +1374,7 @@ export default {
           ajaxData.mac.push(obj.mac_id)
         })
       }
-      
+
       if (this.ruleForm.kq_type == 0) {
         this.times_list.forEach((obj) => {
           if (this.isNewTask) {
@@ -2500,7 +2545,7 @@ export default {
             });
           }
         },
-        error: (error) => { 
+        error: (error) => {
           this.$message({
             showClose: true,
             message: error,

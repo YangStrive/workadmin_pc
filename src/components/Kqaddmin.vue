@@ -4,7 +4,7 @@
       <h2>考勤管理
         <div style="float:right;">
           <h3 v-show="schedule_is_attend == '1'" class="kq-export" >
-            <i class="createico_svg"></i>
+            <i class="export-icon"></i>
           <router-link to="customizedScheduling" style="color:#6699ee;font-weight:normal;font-size:13px;line-height: 1;"
             class="kaaddminset">排班管理</router-link>
           </h3>
@@ -261,8 +261,8 @@
                 </div>
                 <div class="kq-table-record">
                   <el-table :data="tableDataRecord" border style="width: 100%;overflow-x:hidden;" :height="winHeight"
-                    empty-text="暂无数据" :row-class-name="classNameAttribute" @row-click="showKqDetailFn"
-                    v-loading.body="loadingR">
+                    empty-text="暂无数据"
+                    >
                     <el-table-column prop="name" show-overflow-tooltip label="姓名" width="100"></el-table-column>
                     <el-table-column prop="group_name" label="小组" width="186" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="date" label="日期" width="150"></el-table-column>
@@ -274,7 +274,13 @@
                         <p style="font-size: 12px;color: #99a9bf;">{{ scope.row.attend_addr }}</p>
                       </template>
                     </el-table-column>
+                    <el-table-column label="操作" v-if="schedule_is_attend == '1'">
+                      <template slot-scope="scope">
+                        <el-button size="mini" type="primary" @click="attendConfirmApprove(scope.row)">考勤确认</el-button>
+                      </template>
+                    </el-table-column>
                   </el-table>
+
                 </div>
               </div>
             </el-tab-pane>
@@ -1015,7 +1021,7 @@ export default {
         this.schedule_task_id = res.data.list.task_id;
         this.schedule_is_attend = res.data.list.is_attend;
         window.localStorage.setItem("schedule_task_id",res.data.list.task_id);
-        window.localStorage.setItem("schedule_current_user_role_id",res.data.list.current_user_role_id);
+        window.localstorage.setItem("schedule_current_user_role_id",res.data.list.current_user_role_id);
       }
     },
     //考勤--按日统计
@@ -1497,7 +1503,7 @@ export default {
           // this.submitApplyFor(5,row)
         }).catch((err) => {
           console.log('errrrr',err)
-          // this.submitApplyFor(-5,row)   
+          // this.submitApplyFor(-5,row)
         });
     },
     // 同意/拒绝
@@ -2238,7 +2244,7 @@ export default {
     },
     handleSizeChangeReplacement(currentPage){
       console.log('vvvvvv',currentPage)
-      // this.getReplacementCardApproval()    
+      // this.getReplacementCardApproval()
     },
     /******************详情部分*******************/
     //考勤详情弹窗
@@ -2385,6 +2391,10 @@ export default {
         }
       });
     },
+    attendConfirmApprove(row){
+      let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
+      this.$router.replace(url)
+    },
     // 查看位置
     viewLocationFn (task_id, attendance_id) {
       this.showKqDetailLocation = true;
@@ -2468,7 +2478,7 @@ export default {
       // ]);
       // map.setFitView();
       map = new BMap.Map("container");
-      var point = new BMap.Point(116.404, 39.925);  // 创建点坐标 
+      var point = new BMap.Point(116.404, 39.925);  // 创建点坐标
       map.centerAndZoom(point, 12);                 // 初始化地图，设置中心点坐标和地图级别
       map.enableScrollWheelZoom(true);
       //打卡位置
@@ -2603,6 +2613,7 @@ export default {
       });
     }
   },
+
   created () {
     this.init();
     //获取导出权限

@@ -3,9 +3,18 @@
     <div class="bill-header">
 			<el-form :inline="true" :model="formInline" class="bill-form-inline">
 				<el-form-item label="账单周期">
-					<el-select v-model="formInline.region" placeholder="请选择账单周期">
-						<el-option label="周期" value="周期"></el-option>
-					</el-select>
+					<el-date-picker
+						v-model="formInline.date"
+						type="daterange"
+						 placeholder="请选择"
+						range-separator="至"
+						start-placeholder="开始日期"
+						end-placeholder="结束日期"
+						value-format="yyyy-MM-dd"
+						format="yyyy-MM-dd"
+						clearable
+						@change="search"
+					></el-date-picker>
 				</el-form-item>
 				<el-form-item label="账单状态">
 					<el-select v-model="formInline.region" placeholder="请选择账单状态">
@@ -37,10 +46,30 @@
 		<!-- 统计-->
 		<div class="bill-statistics">
 			<el-row>
-				<el-col :span="4">
+				<el-col :span="3">
 					<section class="card-section">
 						<div slot="header" class="clearfix">
 							<span>总工时（小时）</span>
+						</div>
+						<div class="bill-statistics-content">
+							<p>0</p>
+						</div>
+					</section>
+				</el-col>
+				<el-col :span="3">
+					<section class="card-section">
+						<div slot="header" class="clearfix">
+							<span>工资总额（元）</span>
+						</div>
+						<div class="bill-statistics-content">
+							<p>0</p>
+						</div>
+					</section>
+				</el-col>
+				<el-col :span="4">
+					<section class="card-section">
+						<div slot="header" class="clearfix">
+							<span>服务费（元）</span>
 						</div>
 						<div class="bill-statistics-content">
 							<p>0</p>
@@ -67,7 +96,7 @@
 						</div>
 					</section>
 				</el-col>
-				<el-col :span="4">
+				<el-col :span="3">
 					<section class="card-section">
 						<div slot="header" class="clearfix">
 							<span>其他费用（元）</span>
@@ -77,17 +106,7 @@
 						</div>
 					</section>
 				</el-col>
-				<el-col :span="4">
-					<section class="card-section">
-						<div slot="header" class="clearfix">
-							<span>往期账单滞纳金（元）</span>
-						</div>
-						<div class="bill-statistics-content">
-							<p>0</p>
-						</div>
-					</section>
-				</el-col>
-				<el-col :span="4">
+				<el-col :span="3">
 					<section class="card-section">
 						<div slot="header" class="clearfix">
 							<span>账单金额（元）</span>
@@ -107,16 +126,16 @@
 				<el-table-column prop="address" label="账单周期" width="180"/>
 				<el-table-column prop="address" label="其他费用" width="180"/>
 				<el-table-column prop="name" label="费用合计" width="100"/>
-				<el-table-column prop="address" label="往期账单滞纳金(元)" width="180"/>
-				<el-table-column prop="name" label="补差费用" width="100"/>
 				<el-table-column prop="address" label="最新同步时间" width="180"/>
-				<el-table-column prop="address" label="应支付日期" width="180"/>
-				<el-table-column label="操作" >
+				<el-table-column prop="name" label="支付时间" width="100"/>
+				<el-table-column prop="address" label="支付状态" width="180"/>
+				<el-table-column prop="address" label="账单金额（元）" width="180"/>
+				<el-table-column label="操作" width="210" fixed="right">
 					<template slot-scope="scope">
-						<el-button type="text" size="small">查看{{ scope.row.name }}</el-button>
+						<el-button type="text" size="small">查看</el-button>
 						<el-button type="text" size="small">下载</el-button>
 						<el-button type="text" size="small" @click="handleClickConfirmBillBtn">确认账单</el-button>
-						<el-button type="text" size="small">退回</el-button>
+						<el-button type="text" size="small" @click="handleClickReturn">退回</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -134,7 +153,7 @@
 
 		<!-- 写个el-dialog 里面展示账单名称 账单周期 账单金额，还有一个输入验证码的input 和一个获取验证码的按钮-->
 		<el-dialog 
-			title="账单详情" 
+			title="账单确认" 
 			:visible.sync="dialogVisibleConfirmBill"
 			size="tiny"
 			>
@@ -142,18 +161,18 @@
 
 				<el-form :model="billForm" label-width="80px">
 					<el-form-item label="账单名称">
-						<el-input v-model="billForm.name"></el-input>
+						<el-input disabled v-model="billForm.name"></el-input>
 					</el-form-item>
 					<el-form-item label="账单周期">
-						<el-input v-model="billForm.region"></el-input>
+						<el-input disabled v-model="billForm.region"></el-input>
 					</el-form-item>
 					<el-form-item label="账单金额">
-						<el-input v-model="billForm.address"></el-input>
+						<el-input disabled v-model="billForm.address"></el-input>
 					</el-form-item>
 					<el-form-item label="验证码">
 						<div class="code-box">
 							<el-input v-model="billForm.address"></el-input>
-							<el-button type="primary">获取验证码</el-button>
+							<el-button type="primary" :disabled="getCodeText != '获取验证码'" @click="handleClickGetCode">{{getCodeText}}</el-button>
 						</div>
 					</el-form-item>
 				</el-form>
@@ -167,6 +186,9 @@
 </template>
 
 <script>
+
+import * as util from "@/assets/js/util.js";
+
 export default {
    name: 'bill-manage',
 	 data() {
@@ -203,9 +225,18 @@ export default {
 				 name: '',
 				 region: '',
 				 address: ''
-			 }
+			 },
+
+			 team_id: '',
+			 project_id: '',
+			 getCodeText: '获取验证码'
 
 		 }
+	 },
+
+	 created(){
+    this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
+    this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
 	 },
 
 	 methods: {
@@ -218,7 +249,37 @@ export default {
 		 },
 		 handleClickConfirmBillBtn(){
 			 this.dialogVisibleConfirmBill = true;
-		 }
+		 },
+
+		 handleClickGetCode(){
+			if(this.getCodeText != '获取验证码') return;
+			 let time = 60;
+			 this.getCodeText = `${time}s`;
+			 let timer = setInterval(() => {
+				 time--;
+				 this.getCodeText = `${time}s`;
+				 if(time <= 0){
+					 clearInterval(timer);
+					 this.getCodeText = '获取验证码';
+				 }
+			 }, 1000);
+		 },
+
+		 handleClickReturn(){
+			// 退回二次确认
+			this.$confirm('确认退回账单？', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				// ajax
+			}).catch(() => {
+				this.$message({
+					type: 'info',
+					message: '已取消退回'
+				});          
+			});
+		 },
 	 }
 }
 </script>

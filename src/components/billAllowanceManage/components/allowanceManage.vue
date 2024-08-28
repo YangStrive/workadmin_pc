@@ -272,7 +272,7 @@ export default {
 				try {
 					let res = await ajaxPromise({
 						url: '/group/member_search',
-						method: 'post',
+						type: 'post',
 						data: {
 							team_id: this.team_id,
 							project_id: this.project_id,
@@ -282,7 +282,7 @@ export default {
 							group_id: ''
 						}
 					})
-					if(res.code == 0){
+					if(res.errno == 0){
 						this.personList = res.data.map(item => {
 							return {
 								value: item.user_id,
@@ -306,7 +306,7 @@ export default {
 			try {
 				let res = await ajaxPromise({
 					url: '/thirdsettlement/bonus_list',
-					method: 'post',
+					type: 'post',
 					data: {
 						team_id: this.team_id,
 						project_id: this.project_id,
@@ -317,17 +317,17 @@ export default {
 					}
 				})
 
-				if(res.code == 0){
+				if(res.errno == 0){
 					this.tableData = res.data.list;
 					this.total_num = res.data.total_num;
 				}else{
 					this.$message({
 						type: 'error',
-						message: res.msg
+						message:res.errmsg
 					});
 				}
 			} catch (error) {
-				
+				throw error;
 			}
 		},
 
@@ -387,7 +387,7 @@ export default {
 			try {
 				let res = await ajaxPromise({
 					url: '/thirdsettlement/bonus_update',
-					method: 'post',
+					type: 'post',
 					data: {
 						team_id: this.team_id,
 						project_id: this.project_id,
@@ -398,7 +398,7 @@ export default {
 					}
 				})
 
-				if(res.code == 0){
+				if(res.errno == 0){
 					this.$message({
 						type: 'success',
 						message: '编辑成功'
@@ -408,7 +408,7 @@ export default {
 				}else{
 					this.$message({
 						type: 'error',
-						message: res.msg
+						message:res.errmsg
 					});
 				}
 			} catch (error) {
@@ -434,7 +434,7 @@ export default {
 				//thirdsettlement/bonus_update
 				let res = await ajaxPromise({
 					url: '/thirdsettlement/bonus_update',
-					method: 'post',
+					type: 'post',
 					data: {
 						team_id: this.team_id,
 						project_id: this.project_id,
@@ -443,7 +443,7 @@ export default {
 					}
 				})
 
-				if(res.code == 0){
+				if(res.errno == 0){
 					this.$message({
 						type: 'success',
 						message: '删除成功'
@@ -452,7 +452,7 @@ export default {
 				}else{
 					this.$message({
 						type: 'error',
-						message: res.msg
+						message:res.errmsg
 					});
 				}
 
@@ -483,7 +483,7 @@ export default {
 			try {
 				let res = await ajaxPromise({
 					url: '/thirdsettlement/bonus_create',
-					method: 'post',
+					type: 'post',
 					data: {
 						attendancedate,
 						user_id,
@@ -495,7 +495,7 @@ export default {
 					}
 				})
 
-				if(res.code == 0){
+				if(res.errno == 0){
 					this.$message({
 						type: 'success',
 						message: '新建成功'
@@ -507,7 +507,7 @@ export default {
 				}else{
 					this.$message({
 						type: 'error',
-						message: res.msg
+						message:res.errmsg
 					});
 				}
 			} catch (error) {

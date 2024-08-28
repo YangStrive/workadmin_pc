@@ -11,10 +11,8 @@
 						range-separator="至"
 						start-placeholder="开始日期"
 						end-placeholder="结束日期"
-						value-format="yyyy-MM-dd"
 						format="yyyy-MM-dd"
 						clearable
-						@change="search"
 					></el-date-picker>
 				</el-form-item>
 				<el-form-item label="人员">
@@ -47,7 +45,6 @@
 				:data="tableData"
 				style="width: 100%"
 			>
-				<el-table-column type="selection" width="55"></el-table-column>
 				<el-table-column prop="worker_name" label="姓名" width="100"></el-table-column>
 				<el-table-column prop="worker_phone" label="手机号" width="120"></el-table-column>
 				<el-table-column prop="r_type" label="费用类型" width="100">
@@ -57,7 +54,7 @@
 				</el-table-column>
 				<el-table-column prop="amount" label="金额(元)" width="100"></el-table-column>
 				<el-table-column prop="pay_status" label="结算状态" width="100"></el-table-column>
-				<el-table-column prop="remark" label="说明" width="100"></el-table-column>
+				<el-table-column prop="remarks" label="说明" width="100"></el-table-column>
 				<el-table-column label="操作" >
 					<template slot-scope="scope">
 						<el-button type="text" size="small" @click="handleClickEdit(scope.row)">编辑</el-button>
@@ -77,88 +74,92 @@
 				</el-pagination>
 			</div>
 		</div>
-		<!-- 写个el-dialog 包含人员搜索的select 费用类型的select 包含奖金和津贴两项，金额（元） 说明限制100字 -->
+
+		<!-- 编辑奖金津贴 -->
 		<el-dialog 
 			title="编辑"
 			:visible.sync="dialogVisibleEdit"
 			size="tiny"
 		>
 			<div class="allowance-form">
-				<el-form :model="editForm" label-width="80px">
+				<el-form :model="editForm" label-width="80px" ref="editForm" :rules="addFormRule">
 					<el-form-item label="人员">
-						<el-select v-model="editForm.user_id" placeholder="请选择" style="width: 100%;">
-							<el-option
-								v-for="item in personList"
-								:key="item.value"
-								:label="item.label"
-								:value="item.value"
-							></el-option>
-						</el-select>
+						<el-input v-model="editForm.worker_name" disabled></el-input>
 					</el-form-item>
-					<el-form-item label="费用类型">
+					<el-form-item label="费用类型" prop="r_type">
 						<el-select v-model="editForm.r_type" placeholder="请选择"  style="width: 100%;">
 							<!--10 奖金 20 津贴-->
-							<el-option value="10" label="奖金"></el-option>
-							<el-option value="20" label="津贴"></el-option>
+							<el-option :value="+10" label="奖金"></el-option>
+							<el-option :value="+20" label="津贴"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="金额(元)">
+					<el-form-item label="金额(元)" prop="amount">
 						<el-input v-model="editForm.amount"></el-input>
 					</el-form-item>
-					<el-form-item label="说明">
+					<el-form-item label="说明" prop="remarks">
 						<el-input v-model="editForm.remarks" type="textarea" :autosize="{ minRows: 2, maxRows: 4}"></el-input>
 					</el-form-item>
 				</el-form>
 			</div>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogVisibleEdit = false">取 消</el-button>
-				<el-button type="primary" @click="dialogVisibleEdit = false">确 定</el-button>
+				<el-button type="primary" @click="handleClickEditAllowance">确 定</el-button>
 			</div>
 		</el-dialog>
+
+		<!-- 新建奖金津贴 -->
 		<el-dialog 
 			title="新建"
 			:visible.sync="dialogVisibleAdd"
 			size="tiny"
 		>
 			<div class="allowance-form">
-				<el-form :model="addForm" label-width="80px">
-					<el-form-item label="日期">
+				<el-form :model="addForm" label-width="80px" :rules="addFormRule" ref="addForm">
+					<el-form-item label="日期" prop="attendancedate">
 						<el-date-picker
+							style="width: 100%;"
 							v-model="addForm.attendancedate"
 							type="date"
 							placeholder="选择日期"
-							value-format="yyyy-MM-dd"
 							format="yyyy-MM-dd"
 						></el-date-picker>
 					</el-form-item>
-					<el-form-item label="人员">
-						<el-select v-model="addForm.user_id" placeholder="请选择" style="width: 100%;">
-							<el-option
-								v-for="item in personList"
-								:key="item.value"
-								:label="item.label"
-								:value="item.value"
-							></el-option>
+					<el-form-item label="人员" prop="user_id">
+						<el-select 
+							style="width: 100%;"
+							v-model="addForm.user_id" 
+							placeholder="请输入关键词" 
+							multiple
+							filterable
+							remote
+							:remote-method="remoteMethod"
+							:loading="searchPersonloading">
+								<el-option
+									v-for="item in personList"
+									:key="item.value"
+									:label="item.label"
+									:value="item.value"
+								></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="费用类型">
+					<el-form-item label="费用类型" prop="r_type">
 						<el-select v-model="addForm.r_type" placeholder="请选择"  style="width: 100%;">
 							<!--10 奖金 20 津贴-->
 							<el-option value="10" label="奖金"></el-option>
 							<el-option value="20" label="津贴"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="金额(元)">
+					<el-form-item label="金额(元)" prop="amount">
 						<el-input v-model="addForm.amount"></el-input>
 					</el-form-item>
-					<el-form-item label="说明">
+					<el-form-item label="说明" prop="remarks">
 						<el-input v-model="addForm.remarks" type="textarea" :autosize="{ minRows: 2, maxRows: 4}"></el-input>
 					</el-form-item>
 				</el-form>
 			</div>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogVisibleAdd = false">取 消</el-button>
-				<el-button type="primary" @click="dialogVisibleAdd = false">确 定</el-button>
+				<el-button type="primary" @click="handleClickAddAllowanceConfirm">确 定</el-button>
 			</div>
 		</el-dialog>
 	</div>
@@ -169,30 +170,52 @@
 import * as util from "@/assets/js/util.js";
 
 let { ajaxPromise } = util;
+
+
 export default {
 	name: 'allowance-manage',
 	data(){
 		return {
+			addFormRule:{
+				attendancedate: [
+					{ required: true, message: '请选择日期', trigger: 'change',type: 'date', }
+				],
+				user_id: [
+					{ required: true, message: '请选择人员', trigger: 'blur' }
+				],
+				r_type: [
+					{ required: true, message: '请选择费用类型', trigger: 'blur' }
+				],
+				amount: [
+					{ required: true, message: '请输入金额', trigger: 'blur' },
+					//只支持数字，支持两位小数
+					{ pattern: /^[0-9]+(.[0-9]{1,2})?$/, message: '请输入正确的金额', trigger: 'blur' }
+				],
+				remarks: [
+					{ required: true, message: '请输入说明', trigger: 'blur' },
+					{ max: 100, message: '说明不能超过100字', trigger: 'blur' }
+				]
+			},
 			searchForm: {
 				date: '',
 				user_id: ''
 			},
 			tableData: [
 				{
-					name: '张三',
-					phone: '13888888888',
-					type: '奖金',
-					money: '1000',
-					status: '未结算',
-					remark: '无'
+					worker_name: '张三',
+					worker_phone: '13888888888',
+					r_type: 10,
+					amount: 100,
+					pay_status: '已结算',
+					remark: '备注'
 				},
 				{
-					name: '李四',
-					phone: '13888888888',
-					type: '津贴',
-					money: '2000',
-					status: '已结算',
-					remark: '无'
+					worker_name: '李四',
+					worker_phone: '13888888888',
+					r_type: 20,
+					amount: 100,
+					pay_status: '未结算',
+					remark: '备注'
 				}
 			],
 			personList: [],
@@ -201,7 +224,7 @@ export default {
 			total_num: 100,
 			dialogVisibleEdit: false,
 			editForm: {
-				user_id: '',
+				worker_name: '',
 				r_type: '',
 				amount: '',
 				remarks: ''
@@ -227,7 +250,7 @@ export default {
 			project_id: '',
 			dialogVisibleAdd: false,
 			searchPersonloading: false,
-
+			
 		}
 	},
 
@@ -239,7 +262,7 @@ export default {
 	methods: {
 
 		search(){
-			//sea/api/1.0/client/v1/thirdsettlement/bonus_list
+			this.getAllowanceList();
 		},
 
 		async remoteMethod(query){
@@ -279,20 +302,30 @@ export default {
 		},
 
 		async getAllowanceList(){
-			//sea/api/1.0/client/v1/thirdsettlement/bonus_list
+			//thirdsettlement/bonus_list
 			try {
 				let res = await ajaxPromise({
-					url: '/sea/api/1.0/client/v1/thirdsettlement/bonus_list',
+					url: '/thirdsettlement/bonus_list',
 					method: 'post',
 					data: {
 						team_id: this.team_id,
 						project_id: this.project_id,
 						page_no: this.page_no,
 						page_size: this.page_size,
-						start_time: this.searchForm.date[0],
-						end_time: this.searchForm.date[1],
+						start_time: util.formatData1(this.searchForm.date[0]),
+						end_time: util.formatData1(this.searchForm.date[1]),
 					}
 				})
+
+				if(res.code == 0){
+					this.tableData = res.data.list;
+					this.total_num = res.data.total_num;
+				}else{
+					this.$message({
+						type: 'error',
+						message: res.msg
+					});
+				}
 			} catch (error) {
 				
 			}
@@ -314,8 +347,73 @@ export default {
 		},
 
 		handleClickEdit(row){
-			console.log(row)
+			let {
+				worker_name,
+				r_type,
+				amount,
+				remarks,
+				id
+			} = row;
+			this.editForm = {
+				worker_name,
+				r_type,
+				amount,
+				remarks,
+				id
+			}
+
 			this.dialogVisibleEdit = true;
+		},
+
+		//确认编辑
+		handleClickEditAllowance(){
+			this.$refs.editForm.validate((valid) => {
+				if (valid) {
+					this.sumbitEditAllowance();
+				} else {
+					return false;
+				}
+			});
+		},
+
+		//提交编辑
+		async sumbitEditAllowance(){
+			let {
+				r_type,
+				amount,
+				remarks,
+				id
+			} = this.editForm;
+			try {
+				let res = await ajaxPromise({
+					url: '/thirdsettlement/bonus_update',
+					method: 'post',
+					data: {
+						team_id: this.team_id,
+						project_id: this.project_id,
+						record_id: id,
+						r_type,
+						amount,
+						remarks
+					}
+				})
+
+				if(res.code == 0){
+					this.$message({
+						type: 'success',
+						message: '编辑成功'
+					});
+					this.dialogVisibleEdit = false;
+					this.getAllowanceList();
+				}else{
+					this.$message({
+						type: 'error',
+						message: res.msg
+					});
+				}
+			} catch (error) {
+				
+			}
 		},
 
 		//删除
@@ -326,15 +424,96 @@ export default {
 				cancelButtonText: '取消',
 				type: 'warning'
 			}).then(() => {
-				//ajax
-				//sea/api/1.0/client/v1/thirdsettlement/bonus_delete
-			}).catch(() => {
-				this.$message({
-					type: 'info',
-					message: '已取消删除'
-				});          
+				this.submitDeleteRecord(row.id);    
+			}).catch(() => {        
 			});
 		},
+
+		async submitDeleteRecord(id){
+			try {
+				//thirdsettlement/bonus_update
+				let res = await ajaxPromise({
+					url: '/thirdsettlement/bonus_update',
+					method: 'post',
+					data: {
+						team_id: this.team_id,
+						project_id: this.project_id,
+						record_id: id,
+						pay_status: -1
+					}
+				})
+
+				if(res.code == 0){
+					this.$message({
+						type: 'success',
+						message: '删除成功'
+					});
+					this.getAllowanceList();
+				}else{
+					this.$message({
+						type: 'error',
+						message: res.msg
+					});
+				}
+
+			} catch (error) {
+				
+			}
+		},
+
+		handleClickAddAllowanceConfirm(){
+			this.$refs.addForm.validate((valid) => {
+				if (valid) {
+					this.sumbitAddAllowance();
+				} else {
+					return false;
+				}
+			});
+		},
+
+		async sumbitAddAllowance(){
+			///thirdsettlement/bonus_create
+			let {
+				attendancedate,
+				user_id,
+				r_type,
+				amount,
+				remarks
+			} = this.addForm;
+			try {
+				let res = await ajaxPromise({
+					url: '/thirdsettlement/bonus_create',
+					method: 'post',
+					data: {
+						attendancedate,
+						user_id,
+						r_type,
+						amount,
+						remarks,
+						team_id: this.team_id,
+						project_id: this.project_id,
+					}
+				})
+
+				if(res.code == 0){
+					this.$message({
+						type: 'success',
+						message: '新建成功'
+					});
+					this.dialogVisibleAdd = false;
+					this.getAllowanceList();
+					//清空表单
+					this.$refs.addForm.resetFields();
+				}else{
+					this.$message({
+						type: 'error',
+						message: res.msg
+					});
+				}
+			} catch (error) {
+				
+			}
+		}
 
 	}
 }

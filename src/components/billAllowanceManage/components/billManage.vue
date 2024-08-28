@@ -159,7 +159,7 @@
 			>
 			<div class="form-bill-box">
 
-				<el-form :model="billForm" label-width="80px">
+				<el-form :model="billForm" label-width="80px" ref="billForm" :rules="rulesBillForm">
 					<el-form-item label="账单名称">
 						<el-input disabled v-model="billForm.name"></el-input>
 					</el-form-item>
@@ -169,9 +169,9 @@
 					<el-form-item label="账单金额">
 						<el-input disabled v-model="billForm.address"></el-input>
 					</el-form-item>
-					<el-form-item label="验证码">
+					<el-form-item label="验证码" prop="code">
 						<div class="code-box">
-							<el-input v-model="billForm.address"></el-input>
+							<el-input v-model="billForm.code"></el-input>
 							<el-button type="primary" :disabled="getCodeText != '获取验证码'" @click="handleClickGetCode">{{getCodeText}}</el-button>
 						</div>
 					</el-form-item>
@@ -179,7 +179,7 @@
 			</div>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogVisibleConfirmBill = false">取 消</el-button>
-				<el-button type="primary" @click="dialogVisibleConfirmBill = false">确 定</el-button>
+				<el-button type="primary" @click="handleClickBillConfirm">确 定</el-button>
 			</div>
 		</el-dialog>
   </div>
@@ -188,6 +188,7 @@
 <script>
 
 import * as util from "@/assets/js/util.js";
+let { ajaxPromise } = util;
 
 export default {
    name: 'bill-manage',
@@ -224,7 +225,13 @@ export default {
 			 billForm: {
 				 name: '',
 				 region: '',
-				 address: ''
+				 address: '',
+				 code: ''
+			 },
+			 rulesBillForm: {
+				 code: [
+					 { required: true, message: '请输入验证码', trigger: 'blur' }
+				 ]
 			 },
 
 			 team_id: '',
@@ -251,20 +258,50 @@ export default {
 			 this.dialogVisibleConfirmBill = true;
 		 },
 
-		 handleClickGetCode(){
+		 async handleClickGetCode(){
 			if(this.getCodeText != '获取验证码') return;
-			 let time = 60;
-			 this.getCodeText = `${time}s`;
-			 let timer = setInterval(() => {
-				 time--;
-				 this.getCodeText = `${time}s`;
-				 if(time <= 0){
-					 clearInterval(timer);
-					 this.getCodeText = '获取验证码';
-				 }
-			 }, 1000);
+
+			try {
+				//thirdsettlement/verification/code
+				let res =  await ajaxPromise({
+					url:'/thirdsettlement/verification/code', 
+					method: 'post',
+					data:{
+						team_id: this.team_id,
+						project_id: this.project_id,
+						settle_id: this.settle_id
+					}
+				});
+
+				if(res.code == 0){
+					this.$message({
+						type: 'success',
+						message: '验证码发送成功'
+					});
+					this.countDown();
+				}else{
+					
+				}
+			} catch (error) {
+				throw error;
+			}
 		 },
 
+		 //计算验证码倒计时
+		 countDown(){
+			let time = 60;
+			this.getCodeText = `${time}s`;
+			let timer = setInterval(() => {
+				time--;
+				this.getCodeText = `${time}s`;
+				if(time <= 0){
+					clearInterval(timer);
+					this.getCodeText = '获取验证码';
+				}
+			}, 1000);
+		},
+
+		//账单退回
 		 handleClickReturn(){
 			// 退回二次确认
 			this.$confirm('确认退回账单？', '提示', {
@@ -280,6 +317,49 @@ export default {
 				});          
 			});
 		 },
+
+		 //账单确认
+		 handleClickBillConfirm(){
+			this.$refs.billForm.validate((valid) => {
+				if (valid) {
+					this.submitBillConfirm();
+				} else {
+					return false;
+				}
+			});
+		 },
+
+		 async submitBillConfirm(){
+			try {
+				let res =  await ajaxPromise({
+					url:'/thirdsettlement/submit', 
+					method: 'post',
+					data:{
+						team_id: this.team_id,
+						project_id: this.project_id,
+						settle_id: this.settle_id,
+						code: this.billForm.code,
+					}
+				});
+
+				if(res.code == 0){
+					this.$message({
+						type: 'success',
+						message: '账单确认成功'
+					});
+					this.dialogVisibleConfirmBill = false;
+
+				}else{
+					this.$message({
+						type: 'error',
+						message: res.msg
+					});
+				}
+			} catch (error) {
+				
+			}
+		},			
+
 	 }
 }
 </script>

@@ -7,7 +7,7 @@
 					<el-date-picker
 						v-model="searchForm.date"
 						type="daterange"
-						 placeholder="请选择"
+						placeholder="请选择"
 						range-separator="至"
 						start-placeholder="开始日期"
 						end-placeholder="结束日期"
@@ -16,12 +16,13 @@
 					></el-date-picker>
 				</el-form-item>
 				<el-form-item label="人员">
+					<!--搜索人员 运行手动清除-->
 					<el-select 
 					v-model="searchForm.user_id" 
 					placeholder="请输入关键词" 
-					multiple
 					filterable
 					remote
+					clearable
 					:remote-method="remoteMethod"
 					:loading="searchPersonloading">
 						<el-option
@@ -54,9 +55,9 @@
 				</el-table-column>
 				<el-table-column prop="amount" label="金额(元)" width="100"></el-table-column>
 				<el-table-column prop="pay_status" label="结算状态" width="100"></el-table-column>
-				<el-table-column prop="remarks" label="说明" width="100"></el-table-column>
-				<el-table-column label="操作" >
-					<template slot-scope="scope">
+				<el-table-column prop="remarks" label="说明"></el-table-column>
+				<el-table-column label="操作" width="100">
+					<template slot-scope="scope" v-if="scope.row.pay_status == 0">
 						<el-button type="text" size="small" @click="handleClickEdit(scope.row)">编辑</el-button>
 						<el-button type="text" size="small" @click="handeleClickDelete(scope.row)">删除</el-button>
 					</template>
@@ -86,11 +87,11 @@
 					<el-form-item label="人员">
 						<el-input v-model="editForm.worker_name" disabled></el-input>
 					</el-form-item>
-					<el-form-item label="费用类型" prop="r_type">
+					<el-form-item label="费用类型" prop="r_type_text">
 						<el-select v-model="editForm.r_type" placeholder="请选择"  style="width: 100%;">
 							<!--10 奖金 20 津贴-->
-							<el-option :value="+10" label="奖金"></el-option>
-							<el-option :value="+20" label="津贴"></el-option>
+							<el-option value="10" label="奖金"></el-option>
+							<el-option value="20" label="津贴"></el-option>
 						</el-select>
 					</el-form-item>
 					<el-form-item label="金额(元)" prop="amount">
@@ -129,9 +130,9 @@
 							style="width: 100%;"
 							v-model="addForm.user_id" 
 							placeholder="请输入关键词" 
-							multiple
-							filterable
+							clearable
 							remote
+							filterable
 							:remote-method="remoteMethod"
 							:loading="searchPersonloading">
 								<el-option
@@ -150,10 +151,10 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="金额(元)" prop="amount">
-						<el-input v-model="addForm.amount"></el-input>
+						<el-input v-model="addForm.amount" placeholder="请输入金额，单位元"></el-input>
 					</el-form-item>
 					<el-form-item label="说明" prop="remarks">
-						<el-input v-model="addForm.remarks" type="textarea" :autosize="{ minRows: 2, maxRows: 4}"></el-input>
+						<el-input v-model="addForm.remarks" type="textarea" :autosize="{ minRows: 2, maxRows: 4}" placeholder="请输入说明"></el-input>
 					</el-form-item>
 				</el-form>
 			</div>
@@ -181,10 +182,10 @@ export default {
 					{ required: true, message: '请选择日期', trigger: 'change',type: 'date', }
 				],
 				user_id: [
-					{ required: true, message: '请选择人员', trigger: 'blur' }
+					{ required: true, message: '请选择人员', trigger: 'change',type: 'number', }
 				],
 				r_type: [
-					{ required: true, message: '请选择费用类型', trigger: 'blur' }
+					{ required: true, message: '请选择费用类型', trigger: 'change' }
 				],
 				amount: [
 					{ required: true, message: '请输入金额', trigger: 'blur' },
@@ -200,24 +201,7 @@ export default {
 				date: '',
 				user_id: ''
 			},
-			tableData: [
-				{
-					worker_name: '张三',
-					worker_phone: '13888888888',
-					r_type: 10,
-					amount: 100,
-					pay_status: '已结算',
-					remark: '备注'
-				},
-				{
-					worker_name: '李四',
-					worker_phone: '13888888888',
-					r_type: 20,
-					amount: 100,
-					pay_status: '未结算',
-					remark: '备注'
-				}
-			],
+			tableData: [],
 			personList: [],
 			page_no: 1,
 			page_size: 10,
@@ -257,6 +241,7 @@ export default {
 	created(){
     this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
     this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
+		this.getAllowanceList();
 	},
 
 	methods: {
@@ -283,10 +268,26 @@ export default {
 						}
 					})
 					if(res.errno == 0){
-						this.personList = res.data.map(item => {
+						let dataList = [
+							{
+								"group_id": 49830,
+								"group_name": "龙华店",
+								"user_id": 64,
+								"user_name": "赵丽娟",
+								"mobile": "15300047440",
+							},
+							{
+								"group_id": 49838,
+								"group_name": "龙华店",
+								"user_id": 61,
+								"user_name": "赵丽娟",
+								"mobile": "153000474410",
+							}
+						]
+						this.personList = dataList.map(item => {
 							return {
 								value: item.user_id,
-								label: item.user_name
+								label: item.user_name + ' (' + item.mobile +') '
 							}
 						})
 					}
@@ -314,6 +315,7 @@ export default {
 						page_size: this.page_size,
 						start_time: util.formatData1(this.searchForm.date[0]),
 						end_time: util.formatData1(this.searchForm.date[1]),
+						user_id: this.searchForm.user_id
 					}
 				})
 
@@ -466,6 +468,7 @@ export default {
 				if (valid) {
 					this.sumbitAddAllowance();
 				} else {
+					console.log('error submit!!',this.addForm);
 					return false;
 				}
 			});

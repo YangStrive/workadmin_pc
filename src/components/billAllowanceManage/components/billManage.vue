@@ -8,17 +8,17 @@
 						@change="search"></el-date-picker>
 				</el-form-item>
 				<el-form-item label="账单状态">
-					<el-select v-model="searchForm.listing_status" placeholder="请选择账单状态">
+					<el-select v-model="searchForm.listing_status" placeholder="请选择账单状态" clearable>
 						<el-option v-for="(value,key) in listStatus" :key="key" :label="value" :value="key" />
 					</el-select>
 				</el-form-item>
 				<el-form-item label="支付状态">
-					<el-select v-model="searchForm.payment_status" placeholder="请选择支付状态">
+					<el-select v-model="searchForm.payment_status" placeholder="请选择支付状态" clearable>
 						<el-option v-for="(value,key) in paymentStatus" :key="key" :label="value" :value="key" />
 					</el-select>
 				</el-form-item>
 				<el-form-item label="账单名称">
-					<el-input v-model="searchForm.title" placeholder="请输入账单名称"></el-input>
+					<el-input v-model="searchForm.title" placeholder="请输入账单名称" clearable></el-input>
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="handleClickSearch()">查询</el-button>
@@ -112,16 +112,16 @@
 				</el-table-column>
 				<el-table-column prop="other_amount" label="其他费用" width="180" />
 				<el-table-column prop="total_amount" label="费用合计" width="100" />
-				<el-table-column prop="address" label="最新同步时间" width="180" />
-				<el-table-column prop="name" label="支付时间" width="100" />
+				<el-table-column prop="modify_at" label="最新同步时间" width="180" />
+				<el-table-column prop="payment_at" label="支付时间" width="100" />
 				<el-table-column prop="payment_status" label="支付状态" width="180" />
 				<el-table-column prop="settlement_amount" label="账单金额（元）" width="180" />
-				<el-table-column label="操作" width="210" fixed="right">
+				<el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
-						<el-button type="text" size="small">查看</el-button>
-						<el-button type="text" size="small">下载</el-button>
-						<el-button type="text" size="small" @click="handleClickConfirmBillBtn(scope.row)">确认账单</el-button>
-						<el-button type="text" size="small" @click="handleClickReturn(scope.row.id)">退回</el-button>
+						<el-button type="text" size="small" v-if="scope.row.view_permission == 1" @click="handleClickPreviewDetial(scope.row.id)">查看</el-button>
+						<el-button type="text" size="small" v-if="scope.row.download_permission == 1">下载</el-button>
+						<el-button type="text" size="small" @click="handleClickConfirmBillBtn(scope.row)" v-if="scope.row.confirm_permission == 1">确认账单</el-button>
+						<el-button type="text" size="small" @click="handleClickReturn(scope.row.id)" v-if="scope.row.refuse_permission == 1">退回</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -149,7 +149,10 @@
 					<el-form-item label="验证码" prop="code">
 						<div class="code-box">
 							<el-input v-model="billForm.code"></el-input>
-							<el-button type="primary" :disabled="getCodeText != '获取验证码'"
+							<el-button 
+								type="primary" 
+								:disabled="getCodeText != '获取验证码'"
+								style="width: 100px;"
 								@click="handleClickGetCode">{{ getCodeText }}</el-button>
 						</div>
 					</el-form-item>
@@ -277,6 +280,9 @@ export default {
 				code: '',
 				id: row.id,
 			};
+			
+			clearInterval(window.TIMER);
+			this.getCodeText = '获取验证码';
 			this.dialogVisibleConfirmBill = true;
 		},
 
@@ -316,11 +322,11 @@ export default {
 		countDown() {
 			let time = 60;
 			this.getCodeText = `${time}s`;
-			let timer = setInterval(() => {
+			window.TIMER = setInterval(() => {
 				time--;
 				this.getCodeText = `${time}s`;
 				if (time <= 0) {
-					clearInterval(timer);
+					clearInterval(window.TIMER);
 					this.getCodeText = '获取验证码';
 				}
 			}, 1000);
@@ -357,6 +363,7 @@ export default {
 						type: 'success',
 						message: '账单退回成功'
 					});
+					this.getTablesData();
 
 				} else {
 					this.$message({
@@ -400,7 +407,7 @@ export default {
 						message: '账单确认成功'
 					});
 					this.dialogVisibleConfirmBill = false;
-
+					this.getTablesData();
 				} else {
 					this.$message({
 						type: 'error',
@@ -411,6 +418,15 @@ export default {
 
 			}
 		},
+
+		handleClickPreviewDetial(id) {
+			this.$router.push({
+				name: 'SettlementPreview',
+				query: {
+					id
+				}
+			});
+		}
 
 	}
 }
@@ -458,7 +474,7 @@ export default {
 }
 
 .form-bill-box {
-	padding: 20px;
+	padding:30px 40px 30px 30px;
 }
 
 .form-bill-box .code-box {

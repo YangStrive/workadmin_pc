@@ -105,7 +105,7 @@ export default {
         type: "GET",
         data: {
           project_id: this.project_id,
-          page_no: this.export_currentPage,
+          page_no: this.export_currentPage, 
           page_size: this.export_pageSize,
           type: this.type,
         },

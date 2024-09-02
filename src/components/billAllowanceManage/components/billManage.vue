@@ -23,6 +23,17 @@
 				<el-form-item>
 					<el-button type="primary" @click="handleClickSearch()">查询</el-button>
 				</el-form-item>
+				<el-form-item>
+					<div
+						class="btn-item"
+						style="margin: 0 0 0 50px"
+						@click="dialogVisibleExport = true"
+					>
+						<i class="export-icon"></i>
+						<el-button type="text">查看导出列表</el-button>
+					</div>
+				</el-form-item>
+
 			</el-form>
 		</div>
 		<!-- 统计-->
@@ -119,7 +130,7 @@
 				<el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
 						<el-button type="text" size="small" v-if="scope.row.view_permission == 1" @click="handleClickPreviewDetial(scope.row.id)">查看</el-button>
-						<el-button type="text" size="small" v-if="scope.row.download_permission == 1">下载</el-button>
+						<el-button type="text" size="small" v-if="scope.row.download_permission == 1" @click="handleCLickDownload(scope.row.id)">导出</el-button>
 						<el-button type="text" size="small" @click="handleClickConfirmBillBtn(scope.row)" v-if="scope.row.confirm_permission == 1">确认账单</el-button>
 						<el-button type="text" size="small" @click="handleClickReturn(scope.row.id)" v-if="scope.row.refuse_permission == 1">退回</el-button>
 					</template>
@@ -163,16 +174,21 @@
 				<el-button type="primary" @click="handleClickBillConfirm">确 定</el-button>
 			</div>
 		</el-dialog>
+		<downloadList :dialogExportVisible="dialogVisibleExport" :type="downloadType" :closeDialog="handleClickCloseDialog"/>
 	</div>
 </template>
 
 <script>
+import downloadList from "@/components/common/downloadList";
 
 import * as util from "@/assets/js/util.js";
 let { ajaxPromise } = util;
 
 export default {
 	name: 'bill-manage',
+	components: {
+		downloadList
+	},
 	data() {
 		return {
 			searchForm: {
@@ -204,7 +220,8 @@ export default {
 			paymentStatus:[],
 			listStatus:[],
 			headerOverview:{},
-
+			dialogVisibleExport: false,
+			downloadType: '5'
 		}
 	},
 
@@ -426,6 +443,39 @@ export default {
 					id
 				}
 			});
+		},
+
+		handleClickCloseDialog() {
+			this.dialogVisibleExport = false;
+		},
+
+		async handleCLickDownload(id) {
+			try {
+				let res = await ajaxPromise({
+					url: '/thirdsettlement/export',
+					type: 'post',
+					data: {
+						team_id: this.team_id,
+						project_id: this.project_id,
+						type:this.downloadType,
+						settle_id:id
+					}
+				});
+
+				if(res.errno == 0){
+					this.$message({
+						type: 'success',
+						message: '已添加导出队列，稍后前往导出列表查看并下载！'
+					});
+				}else{
+					this.$message({
+						type: 'error',
+						message:res.errmsg
+					});
+				}
+			} catch (error) {
+				
+			}
 		}
 
 	}
@@ -484,5 +534,14 @@ export default {
 
 .form-bill-box .code-box el-input {
 	width: 70%;
+}
+.export-icon{
+	display: block;
+	width: 12px;
+	height: 12px;
+	margin-right: 6px;
+	float: left;
+	margin-top: 11px;
+	background-image:url(../../../assets/imgs/shareIcon/export.svg);
 }
 </style>

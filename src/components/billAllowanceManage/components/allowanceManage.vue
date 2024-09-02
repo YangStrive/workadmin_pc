@@ -53,7 +53,7 @@
 						{{scope.row.r_type == 10 ? '奖金' : '津贴'}}
 					</template>
 				</el-table-column>
-				<el-table-column prop="amount" label="金额(元)" width="100"></el-table-column>
+				<el-table-column prop="amount" label="金额(元)" width="150"></el-table-column>
 				<el-table-column prop="pay_status" label="结算状态" width="100"></el-table-column>
 				<el-table-column prop="remarks" label="说明"></el-table-column>
 				<el-table-column label="操作" width="100">

@@ -268,23 +268,7 @@ export default {
 						}
 					})
 					if(res.errno == 0){
-						let dataList = [
-							{
-								"group_id": 49830,
-								"group_name": "龙华店",
-								"user_id": 64,
-								"user_name": "赵丽娟",
-								"mobile": "15300047440",
-							},
-							{
-								"group_id": 49838,
-								"group_name": "龙华店",
-								"user_id": 61,
-								"user_name": "赵丽娟",
-								"mobile": "153000474410",
-							}
-						]
-						this.personList = dataList.map(item => {
+						this.personList = res.data.list.map(item => {
 							return {
 								value: item.user_id,
 								label: item.user_name + ' (' + item.mobile +') '
@@ -476,8 +460,8 @@ export default {
 
 		async sumbitAddAllowance(){
 			///thirdsettlement/bonus_create
+			let attendancedate = util.formatData1(this.addForm.attendancedate);
 			let {
-				attendancedate,
 				user_id,
 				r_type,
 				amount,
@@ -532,6 +516,6 @@ export default {
 
 	.allowance-form{
 		padding: 20px 40px;
-		width: 400px;
+		width: 320px;
 	}
 </style>

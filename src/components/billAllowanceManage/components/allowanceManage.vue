@@ -36,6 +36,17 @@
 				<el-form-item>
 					<el-button type="primary" @click="search">查询</el-button>
 					<el-button type="primary" @click="handleClickAddAllowance">新建</el-button>
+					<el-button type="primary" @click="handleClickDownLoad">导出</el-button>
+				</el-form-item>
+				<el-form-item>
+					<div
+						class="btn-item"
+						style="margin: 0 0 0 50px"
+						@click="dialogVisibleExport = true"
+					>
+						<i class="export-icon"></i>
+						<el-button type="text">查看导出列表</el-button>
+					</div>
 				</el-form-item>
 			</el-form>
 
@@ -163,17 +174,22 @@
 				<el-button type="primary" @click="handleClickAddAllowanceConfirm">确 定</el-button>
 			</div>
 		</el-dialog>
+		<downloadList :dialogExportVisible="dialogVisibleExport" :type="[2]" :closeDialog="handleClickCloseDialog"/>
 	</div>
 </template>
 
 <script>
 
 import * as util from "@/assets/js/util.js";
+import downloadList from "@/components/common/downloadList";
 
 let { ajaxPromise } = util;
 
 
 export default {
+	components: {
+		downloadList
+	},
 	name: 'allowance-manage',
 	data(){
 		return {
@@ -234,7 +250,7 @@ export default {
 			project_id: '',
 			dialogVisibleAdd: false,
 			searchPersonloading: false,
-			
+			dialogVisibleExport: false,
 		}
 	},
 
@@ -500,6 +516,42 @@ export default {
 			} catch (error) {
 				
 			}
+		},
+
+		handleClickCloseDialog(){
+			this.dialogVisibleExport = false;
+		},
+
+		async handleClickDownLoad(){
+
+				try {
+					let res = await ajaxPromise({
+						url: '/thirdsettlement/export',
+						type: 'post',
+						data: {
+							team_id: this.team_id,
+							project_id: this.project_id,
+							start_time: util.formatData1(this.searchForm.date[0]),
+							end_time: util.formatData1(this.searchForm.date[1]),
+							user_id: this.searchForm.user_id,
+							type: 2
+						}
+					})
+
+					if(res.errno == 0){
+						this.$message({
+							type: 'success',
+							message: '已添加导出队列，稍后前往导出列表查看并下载！'
+						});
+					}else{
+						this.$message({
+							type: 'error',
+							message:res.errmsg
+						});
+					}
+				} catch (error) {
+					
+				}
 		}
 
 	}
@@ -517,5 +569,14 @@ export default {
 	.allowance-form{
 		padding: 20px 40px;
 		width: 320px;
+	}
+	.export-icon{
+		display: block;
+		width: 12px;
+		height: 12px;
+		margin-right: 6px;
+		float: left;
+		margin-top: 11px;
+		background-image:url(../../../assets/imgs/shareIcon/export.svg);
 	}
 </style>

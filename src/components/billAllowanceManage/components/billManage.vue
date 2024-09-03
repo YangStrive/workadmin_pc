@@ -22,7 +22,9 @@
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="handleClickSearch()">查询</el-button>
+					<el-button type="primary" @click="handleClickDownLoad('all')">导出</el-button>
 				</el-form-item>
+
 				<el-form-item>
 					<div
 						class="btn-item"
@@ -130,9 +132,12 @@
 				<el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
 						<el-button type="text" size="small" v-if="scope.row.view_permission == 1" @click="handleClickPreviewDetial(scope.row.id)">查看</el-button>
-						<el-button type="text" size="small" v-if="scope.row.download_permission == 1" @click="handleCLickDownload(scope.row.id)">导出</el-button>
+						<el-button type="text" size="small" v-if="scope.row.download_permission == 1" @click="handleClickDownLoad(scope.row.id)">导出</el-button>
 						<el-button type="text" size="small" @click="handleClickConfirmBillBtn(scope.row)" v-if="scope.row.confirm_permission == 1">确认账单</el-button>
 						<el-button type="text" size="small" @click="handleClickReturn(scope.row.id)" v-if="scope.row.refuse_permission == 1">退回</el-button>
+						<el-button type="text" size="small" @click="handleClickLock(scope.row.id)" v-if="scope.row.lock_permission == 1">锁定</el-button>
+						<el-button type="text" size="small" @click="handleClickUnLock(scope.row.id)" v-if="scope.row.lock_permission == 1">解锁</el-button>
+
 					</template>
 				</el-table-column>
 			</el-table>
@@ -174,7 +179,7 @@
 				<el-button type="primary" @click="handleClickBillConfirm">确 定</el-button>
 			</div>
 		</el-dialog>
-		<downloadList :dialogExportVisible="dialogVisibleExport" :type="downloadType" :closeDialog="handleClickCloseDialog"/>
+		<downloadList :dialogExportVisible="dialogVisibleExport" :type="[3,4]" :closeDialog="handleClickCloseDialog"/>
 	</div>
 </template>
 
@@ -221,7 +226,6 @@ export default {
 			listStatus:[],
 			headerOverview:{},
 			dialogVisibleExport: false,
-			downloadType: '5'
 		}
 	},
 
@@ -449,7 +453,29 @@ export default {
 			this.dialogVisibleExport = false;
 		},
 
-		async handleCLickDownload(id) {
+		async handleClickDownLoad(id) {
+			let data = {
+				team_id: this.team_id,
+				project_id: this.project_id,
+			};
+			if(id == 'all'){
+				data = {
+					...data,
+					listing_status: this.searchForm.listing_status,
+					payment_status: this.searchForm.payment_status,
+					title: this.searchForm.title,
+					start_date: util.formatData1(this.searchForm.date[0]),
+					end_date: util.formatData1(this.searchForm.date[1]),
+					type: 3
+				}
+			}else{
+				data = {
+					...data,
+					settle_id:id,
+					type: 4
+				}
+			}
+
 			try {
 				let res = await ajaxPromise({
 					url: '/thirdsettlement/export',
@@ -457,7 +483,6 @@ export default {
 					data: {
 						team_id: this.team_id,
 						project_id: this.project_id,
-						type:this.downloadType,
 						settle_id:id
 					}
 				});
@@ -476,6 +501,88 @@ export default {
 			} catch (error) {
 				
 			}
+		},
+
+		handleClickLock(id) {
+			this.$confirm('确认锁定账单？', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				this.submitBillLock(id);
+			}).catch(() => {
+			});
+		},
+
+		async submitBillLock(id) {
+			try {
+				let res = await ajaxPromise({
+					url: '/thirdsettlement/lock',
+					type: 'post',
+					data: {
+						team_id: this.team_id,
+						project_id: this.project_id,
+						settle_id:id,
+						opertion:1
+					}
+				});
+
+				if (res.errno == 0) {
+					this.$message({
+						type: 'success',
+						message: '账单锁定成功'
+					});
+					this.getTablesData();
+				} else {
+					this.$message({
+						type: 'error',
+						message:res.errmsg
+					});
+				}
+			} catch (error) {
+				throw error;
+			}
+		},
+
+		handleClickUnLock(id) {
+			this.$confirm('确认解锁账单？', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				this.submitBillUnLock(id);
+			}).catch(() => {
+			});
+		},
+
+		async submitBillUnLock(id) {
+			try {
+				let res = await ajaxPromise({
+					url: '/thirdsettlement/lock',
+					type: 'post',
+					data: {
+						team_id: this.team_id,
+						project_id: this.project_id,
+						settle_id:id,
+						opertion:0
+					}
+				});
+
+				if (res.errno == 0) {
+					this.$message({
+						type: 'success',
+						message: '账单解锁成功'
+					});
+					this.getTablesData();
+				} else {
+					this.$message({
+						type: 'error',
+						message:res.errmsg
+					});
+				}
+			} catch (error) {
+				throw error;
+			}
 		}
 
 	}
@@ -485,6 +592,9 @@ export default {
 <style scoped>
 .card-section {
 	border-right: 1px solid #e0e6ed;
+}
+.bill-statistics .el-row .el-col:last-child .card-section {
+	border-right: none;
 }
 
 /** 最后一个元素不显示边框 */

@@ -559,6 +559,14 @@
         </div>
       </el-dialog>
     </div> -->
+
+    <kqConfirm  
+      :dialogKqConfirmVisible="dialogKqConfirmVisible"  
+      :closeDialog="handleClickCloseKqConfirmDialog" 
+      :kqConfirmDate="kqConfirmDate" 
+      :kqConfirmTaskId="kqConfirmTaskId"
+      :kqConfirmUserId="kqConfirmUserId"
+    />
   </div>
 </template>
 
@@ -566,6 +574,7 @@
 import * as util from "../assets/js/util.js";
 
 import SelectGroupMulti from "@/components/common/SelectGroupMulti";
+import kqConfirm from "@/components/common/kqConfirm";
 
 import p_icon1 from "@/assets/imgs/kqaddmin/position_bz.svg";
 import p_icon2 from "@/assets/imgs/kqaddmin/position.svg";
@@ -594,7 +603,8 @@ var _this = null
 export default {
   name: "kqaddmin",
   components: {
-    SelectGroupMulti
+    SelectGroupMulti,
+    kqConfirm,
   },
   data: function () {
     var testStartTime0 = (rule, value, callback) => {
@@ -906,6 +916,13 @@ export default {
       pushInDialogVisible:false,
       schedule_task_id:0,
       schedule_is_attend:'0',
+
+      dialogKqConfirmVisible:false,
+      kqConfirmData:{},
+      kqConfirmTaskId:0,
+      kqConfirmUserId:0,
+      kqConfirmDate:'',
+
     };
   },
   computed: {},
@@ -2392,9 +2409,23 @@ export default {
       });
     },
     attendConfirmApprove(row){
+      this.kqConfirmUserId = row.user_id;
+      this.kqConfirmDate = row.date;
+      this.kqConfirmTaskId = row.task_id;
+      //let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
+      //this.$router.replace(url)
+      this.dialogKqConfirmVisible = true;
+      
       let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
-      this.$router.replace(url)
+      console.log(url)
+      //this.$router.replace(url)
     },
+
+    //关闭考勤确认弹窗
+    handleClickCloseKqConfirmDialog () {
+      this.dialogKqConfirmVisible = false;
+    },
+
     // 查看位置
     viewLocationFn (task_id, attendance_id) {
       this.showKqDetailLocation = true;

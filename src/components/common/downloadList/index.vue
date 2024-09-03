@@ -38,7 +38,7 @@ export default {
   components: {},
   props: {
     type: {
-      type: String,
+      type: String|Array,
       default: '1'
     },
     dialogExportVisible: {
@@ -107,7 +107,7 @@ export default {
           project_id: this.project_id,
           page_no: this.export_currentPage, 
           page_size: this.export_pageSize,
-          type: [this.type],
+          type: JSON.stringify(this.type),
         },
         timeout: 10000,
         success: obj => {

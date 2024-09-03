@@ -2412,11 +2412,10 @@ export default {
       this.kqConfirmUserId = row.user_id;
       this.kqConfirmDate = row.date;
       this.kqConfirmTaskId = row.task_id;
-      //let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
-      //this.$router.replace(url)
-      this.dialogKqConfirmVisible = true;
-      
       let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
+      this.$router.replace(url)
+      //this.dialogKqConfirmVisible = true;
+      
       console.log(url)
       //this.$router.replace(url)
     },

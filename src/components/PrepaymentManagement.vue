@@ -37,15 +37,21 @@
           <!--月份、缴纳人数、项目名、企业合计、个人合计、服务费合计、总计、状态-->
           <el-table-column prop="moth" label="月份" />
           <el-table-column prop="count" label="缴纳人数" />statementDetails
-          <el-table-column prop="project_name" label="项目名" />
-          <el-table-column prop="company_total" label="企业合计" />
-          <el-table-column prop="person_total" label="个人合计" />
-          <el-table-column prop="service_total" label="服务费合计" />
-          <el-table-column prop="total" label="总计" />
-          <el-table-column prop="status" label="状态" />
+          <el-table-column prop="saas_project_name" label="项目名" />
+          <el-table-column prop="enterprise_toal_money" label="企业合计" />
+          <el-table-column prop="personal_total_money" label="个人合计" />
+          <el-table-column prop="service_total_money" label="服务费合计" />
+          <el-table-column prop="total_money" label="总计" />
+          <el-table-column prop="status" label="状态" >
+            <template slot-scope="scope">
+              <span v-if="scope.row.status == 0">未对账</span>
+              <span v-if="scope.row.status == 1">已对账</span>
+            </template>
+          </el-table-column>
           <el-table-column label="操作" width="150">
             <template slot-scope="scope">
-              <el-button type="text" @click="gotoMemberInfoList(scope.row)">查看</el-button>
+              <el-button type="text" @click="handleClickUnlock(scope.row.id)" v-if="scope.row.status == 3">解锁</el-button>
+              <el-button type="text" @click="handleClickLock(scope.row.id)" v-if="scope.row.status == 2">锁定</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -232,7 +238,7 @@ export default {
         }
         
         util.ajax({
-            url:'/ss/list',
+            url:'/ss/accountstatement/list',
             type:'GET',
             data:{
                 team_id: this.team_id,
@@ -263,7 +269,89 @@ export default {
               //网络超时
             }
         })
-      }
+      },
+
+      handleClickLock(ssas_id){
+        this.$confirm('是否锁定该对账单？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          ///ss/accountstatement/lock
+          util.ajax({
+            url:'/ss/accountstatement/lock',
+            type:'POST',
+            data:{
+              ssas_id: ssas_id
+            },
+            timeout:10000,
+            success:(obj) => {
+              if(obj && obj.errno == 0){
+                this.$message({
+                  showClose: true,
+                  message: '锁定成功',
+                  type: 'success'
+                });
+                this.getSSList()
+              }else{
+                this.$message({
+                  showClose: true,
+                  message: obj.errmsg,
+                  type: 'warning'
+                });
+              }
+            },   
+            error: (xhr, status) => {
+              
+            },
+            noNetwork: () => {
+              //网络超时
+            }
+          })
+        }).catch(() => {        
+        });
+      },
+
+      handleClickUnlock(ssas_id){
+        this.$confirm('是否解锁该对账单？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          ////ss/accountstatement/unlock
+          util.ajax({
+            url:'/ss/accountstatement/unlock',
+            type:'POST',
+            data:{
+              ssas_id: ssas_id
+            },
+            timeout:10000,
+            success:(obj) => {
+              if(obj && obj.errno == 0){
+                this.$message({
+                  showClose: true,
+                  message: '解锁成功',
+                  type: 'success'
+                });
+                this.getSSList()
+              }else{
+                this.$message({
+                  showClose: true,
+                  message: obj.errmsg,
+                  type: 'warning'
+                });
+              }
+            },   
+            error: (xhr, status) => {
+              
+            },
+            noNetwork: () => {
+              //网络超时
+            }
+          })
+        }).catch(() => {        
+        });
+      },
   	},
   	mounted() {
     	this.init()
@@ -281,6 +369,9 @@ export default {
 <!-- <style  src='../assets/css/reset.css'></style> -->
 <style  src='../assets/css/social.css'></style>
 <style scoped>
+.table_operate {
+  margin: 10px 0;
+}
 .operate_wrap {
   float: right;
   margin-top: 5px;

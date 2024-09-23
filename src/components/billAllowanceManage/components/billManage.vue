@@ -22,6 +22,7 @@
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="handleClickSearch()">查询</el-button>
+					<el-button type="primary" @click="handleClickCreate()">创建账单</el-button>
 					<el-button type="primary" @click="handleClickDownLoad('all')">导出</el-button>
 				</el-form-item>
 
@@ -136,8 +137,7 @@
 						<el-button type="text" size="small" @click="handleClickConfirmBillBtn(scope.row)" v-if="scope.row.confirm_permission == 1">确认账单</el-button>
 						<el-button type="text" size="small" @click="handleClickReturn(scope.row.id)" v-if="scope.row.refuse_permission == 1">退回</el-button>
 						<el-button type="text" size="small" @click="handleClickLock(scope.row.id)" v-if="scope.row.lock_permission == 1">锁定</el-button>
-						<el-button type="text" size="small" @click="handleClickUnLock(scope.row.id)" v-if="scope.row.lock_permission == 1">解锁</el-button>
-
+						<el-button type="text" size="small" @click="handleClickUnLock(scope.row.id)" v-if="scope.row.unlock_permission == 1">解锁</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -165,8 +165,8 @@
 					<el-form-item label="验证码" prop="code">
 						<div class="code-box">
 							<el-input v-model="billForm.code"></el-input>
-							<el-button 
-								type="primary" 
+							<el-button
+								type="primary"
 								:disabled="getCodeText != '获取验证码'"
 								style="width: 100px;"
 								@click="handleClickGetCode">{{ getCodeText }}</el-button>
@@ -301,7 +301,7 @@ export default {
 				code: '',
 				id: row.id,
 			};
-			
+
 			clearInterval(window.TIMER);
 			this.getCodeText = '获取验证码';
 			this.dialogVisibleConfirmBill = true;
@@ -309,7 +309,7 @@ export default {
 
 		async handleClickGetCode() {
 			if (this.getCodeText != '获取验证码') return;
-			
+
 			try {
 				//thirdsettlement/verification/code
 				let res = await ajaxPromise({
@@ -480,11 +480,7 @@ export default {
 				let res = await ajaxPromise({
 					url: '/thirdsettlement/export',
 					type: 'post',
-					data: {
-						team_id: this.team_id,
-						project_id: this.project_id,
-						settle_id:id
-					}
+					data: data
 				});
 
 				if(res.errno == 0){
@@ -499,7 +495,7 @@ export default {
 					});
 				}
 			} catch (error) {
-				
+
 			}
 		},
 
@@ -583,6 +579,12 @@ export default {
 			} catch (error) {
 				throw error;
 			}
+		},
+
+		handleClickCreate() {
+			this.$router.push({
+				name: 'AttendanceConfirm'
+			});
 		}
 
 	}

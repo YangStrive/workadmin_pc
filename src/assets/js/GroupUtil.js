@@ -15,8 +15,8 @@ class GroupUtil {
    */
   _addRequireAttr (group, pathArr){
     group.forEach((o, i, a) => {
-      group[i].path = pathArr 
-                            ? pathArr.concat({name: group[i].name, id: group[i].id}) 
+      group[i].path = pathArr
+                            ? pathArr.concat({name: group[i].name, id: group[i].id})
                             : [{name: '全部', id: -1}, {name: group[i].name, id: group[i].id}]
             group[i].isSelect = false
       if(o.children.length > 0){
@@ -57,6 +57,7 @@ class GroupUtil {
         groupItem.all = o
         groupItem.id = o.id
         groupItem.name = o.name
+        groupItem.full_name = o.full_name
         groupItem.memberList = o.memberList
         if(o.action){
           groupItem.action = o.action

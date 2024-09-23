@@ -17,6 +17,11 @@
       <div class="project_name">
         <a href="https://faq.doumi.com/help/saas/" style="font-size: 16px; color: #bfbfbf;position: relative; top: 5px; padding-left: 31px;" target="_blank"> 使用帮助</a>
       </div>
+      <div class="project_name">
+      <span style="font-size: 16px; color: #bfbfbf;position: relative; top: 5px; padding-left: 100px;">
+      宁波新诚优聘服务外包有限公司
+      </span>
+      </div>
       <!-- 项目列表-下拉选择 -->
       <div class="project_list" v-show="show_project_list" @click.stop>
         <el-input
@@ -225,7 +230,6 @@ export default {
       };
 
       //获取用户信息
-      // console.log(util.getLocalStorage('projectStorageInfo'))
       this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
       this.project_name = util.getLocalStorage("projectStorageInfo").name;
       this.project_id = this.$route.params.projectId;
@@ -318,7 +322,7 @@ export default {
             message: '网络连接失败，请检查网络',
             type: 'warning'
           });
-            
+
         },
         noNetwork: () => {
           //网络超时
@@ -328,7 +332,7 @@ export default {
             type: 'warning'
           });
         }
-      })           
+      })
     },
     getAppList(cb) {
       util.ajax({
@@ -342,7 +346,7 @@ export default {
           if (res.errno == 0) {
             console.log("applist-------------",res.data.result);
             this.app_list = res.data.result;
-            
+
             console.log(this.app_list);
             if (cb) cb();
             this.departure_number();
@@ -485,7 +489,7 @@ export default {
                         "/project/" + this.project_id + "/overviews"
                       );
                     }
-                  } 
+                  }
                   // else if (
                   //   path === "ssDetails" ||
                   //   path === "socialSecurity"
@@ -505,7 +509,7 @@ export default {
                   //       "/project/" + this.project_id + "/overviews"
                   //     );
                   //   }
-                  // } 
+                  // }
                   else if (
                     path === "ssTab" || path === "ssSafing"
                   ) {
@@ -524,7 +528,7 @@ export default {
                         "/project/" + this.project_id + "/overviews"
                       );
                     }
-                  } 
+                  }
                   else if (path === "projectset") {
                     //项目设置
                     let isOK = this.app_list.some((item) => {
@@ -564,6 +568,19 @@ export default {
                     if (isOK) {
                       this.$router.push(
                         "/project/" + this.project_id + "/" + "PaydayReport"
+                      );
+                    } else {
+                      this.$router.push(
+                        "/project/" + this.project_id + "/overviews"
+                      );
+                    }
+                  }else if(path === "billAllowanceManage"){
+                    let isOK = this.app_list.some((item) => {
+                      return item.app_id == 26;
+                    });
+                    if (isOK) {
+                      this.$router.push(
+                        "/project/" + this.project_id + "/" + "billAllowanceManage"
                       );
                     } else {
                       this.$router.push(
@@ -668,6 +685,11 @@ export default {
           break;
         case 25:
           this.$router.replace("OutgoingManagement");
+          break;
+        case 26:
+          this.$router.replace("billAllowanceManage");
+          break;
+
       }
     },
     changeSideBar() {
@@ -711,7 +733,7 @@ export default {
         cur_route.indexOf("membererror") >= 0 ||
         cur_route.indexOf("memberset") >= 0 ||
         cur_route.indexOf("memberinfo") >= 0 ||
-        cur_route.indexOf("invitationmember") >= 0 || 
+        cur_route.indexOf("invitationmember") >= 0 ||
         cur_route.indexOf("ssSafing?from=memberadmin") >= 0
       ) {
         //人员管理
@@ -736,19 +758,27 @@ export default {
       ) {
         //用工保险
         this.cur_app_id = 5;
-      } 
+      }
       // else if (
       //   cur_route.indexOf("socialSecurity") >= 0 ||
       //   cur_route.indexOf("ssDetails") >= 0
       // ) {
       //   this.cur_app_id = 20;
-      // } 
+      // }
       else if (
         cur_route.indexOf("ssTab") >= 0 ||
         cur_route.indexOf("ssDetails") >= 0
       ) {
         this.cur_app_id = 20;
-      } 
+      }
+      else if (
+        cur_route.indexOf("billAllowanceManage") >= 0  ||
+        cur_route.indexOf("AttendanceConfirm") >= 0  ||
+        cur_route.indexOf("SettlementPreview") >= 0  ||
+        cur_route.indexOf("SettlementDetail") >= 0
+      ) {
+        this.cur_app_id = 26;
+      }
       else if (cur_route.indexOf("projectset") >= 0) {
         //项目设置
         this.cur_app_id = 999;
@@ -810,7 +840,7 @@ export default {
         },
       });
     },
-    
+
     useHelp(){
       window.location.href = 'https://faq.doumi.com/help/saas/'
     }
@@ -1264,6 +1294,18 @@ export default {
   .side_bar_item.select
   .side_bar_item_icon.app_icon_20 {
   background-image: url(../assets/imgs/applications/shebao_hover.svg);
+}
+
+
+.main .side_bar .side_bar_items .side_bar_item .side_bar_item_icon.app_icon_26 {
+  background-image: url(../assets/imgs/applications/salary_icon.svg);
+}
+.main
+  .side_bar
+  .side_bar_items
+  .side_bar_item.select
+  .side_bar_item_icon.app_icon_26 {
+  background-image: url(../assets/imgs/applications/salary_icon_hover.svg);
 }
 .main .side_bar .side_bar_items .side_bar_item .side_bar_item_icon.app_icon_24 {
   background-image: url(../assets/imgs/applications/wage.svg);

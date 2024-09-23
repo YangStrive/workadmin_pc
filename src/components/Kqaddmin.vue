@@ -107,15 +107,25 @@
                       </el-form-item>
                     </div>
                     <div class="from-item-list">
-                      <el-form-item label="小组：">
+                      <el-form-item label="部门：" v-if="schedule_is_attend == '1'">
                         <el-button @click="openGroupSelecter" class="groupDay group"
                           style="width:175px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
-                          v-if="selected_groups.length">已选{{ selected_groups.length }}个小组<i class="el-icon-caret-bottom"
+                          v-if="selected_groups.length">已选{{ selected_groups.length }}个部门<i class="el-icon-caret-bottom"
                             style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
                         <el-button @click="openGroupSelecter" class="groupDay group"
                           style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
                           v-else>全部<i class="el-icon-caret-bottom"
                             style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
+                      </el-form-item>
+                      <el-form-item label="小组：" v-else>
+                        <el-button @click="openGroupSelecter" class="groupDay group"
+                                   style="width:175px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
+                                   v-if="selected_groups.length">已选{{ selected_groups.length }}个小组<i class="el-icon-caret-bottom"
+                                                                                                          style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
+                        <el-button @click="openGroupSelecter" class="groupDay group"
+                                   style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
+                                   v-else>全部<i class="el-icon-caret-bottom"
+                                                 style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
                       </el-form-item>
                     </div>
                     <div class="from-item-list member">
@@ -169,15 +179,27 @@
                       </el-form-item>
                     </div>
                     <div class="from-item-list">
-                      <el-form-item label="小组：">
+                      <el-form-item label="部门：" v-if="schedule_is_attend == '1'">
                         <el-button @click="openGroupSelecter" class="groupDay group"
                           style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
-                          v-if="selected_groups.length">已选{{ selected_groups.length }}个小组<i class="el-icon-caret-bottom"
+                          v-if="selected_groups.length">已选{{ selected_groups.length }}个部门<i class="el-icon-caret-bottom"
                             style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
                         <el-button @click="openGroupSelecter" class="groupDay group"
                           style="width:175px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
                           v-else>全部<i class="el-icon-caret-bottom"
                             style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
+                        <!-- </el-select>
+                                                </el-select> -->
+                      </el-form-item>
+                      <el-form-item label="小组：" v-else>
+                        <el-button @click="openGroupSelecter" class="groupDay group"
+                                   style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
+                                   v-if="selected_groups.length">已选{{ selected_groups.length }}个小组<i class="el-icon-caret-bottom"
+                                                                                                          style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
+                        <el-button @click="openGroupSelecter" class="groupDay group"
+                                   style="width:175px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 4px;"
+                                   v-else>全部<i class="el-icon-caret-bottom"
+                                                 style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
                         <!-- </el-select>
                                                 </el-select> -->
                       </el-form-item>
@@ -224,15 +246,25 @@
                       </el-form-item>
                     </div>
                     <div class="from-item-list">
-                      <el-form-item label="小组：">
+                      <el-form-item label="部门：" v-if="schedule_is_attend == '1'">
                         <el-button @click="openGroupSelecter" class="groupDay group"
                           style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
-                          v-if="selected_groups.length">已选{{ selected_groups.length }}个小组 <i class="el-icon-caret-bottom"
+                          v-if="selected_groups.length">已选{{ selected_groups.length }}个部门 <i class="el-icon-caret-bottom"
                             style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
                         <el-button @click="openGroupSelecter" class="groupDay group"
                           style="width:175px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
                           v-else>全部<i class="el-icon-caret-bottom"
                             style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
+                      </el-form-item>
+                      <el-form-item label="小组：" v-else>
+                        <el-button @click="openGroupSelecter" class="groupDay group"
+                                   style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
+                                   v-if="selected_groups.length">已选{{ selected_groups.length }}个小组 <i class="el-icon-caret-bottom"
+                                                                                                           style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
+                        <el-button @click="openGroupSelecter" class="groupDay group"
+                                   style="width:175px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
+                                   v-else>全部<i class="el-icon-caret-bottom"
+                                                 style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"></i></el-button>
                       </el-form-item>
                     </div>
                     <div class="from-item-list member">
@@ -559,14 +591,14 @@
         </div>
       </el-dialog>
     </div> -->
-
-    <kqConfirm  
-      :dialogKqConfirmVisible="dialogKqConfirmVisible"  
-      :closeDialog="handleClickCloseKqConfirmDialog" 
-      :kqConfirmDate="kqConfirmDate" 
+    <kqConfirm
+      :dialogKqConfirmVisible="dialogKqConfirmVisible"
+      :closeDialog="handleClickCloseKqConfirmDialog"
+      :kqConfirmDate="kqConfirmDate"
       :kqConfirmTaskId="kqConfirmTaskId"
       :kqConfirmUserId="kqConfirmUserId"
     />
+
   </div>
 </template>
 
@@ -575,10 +607,10 @@ import * as util from "../assets/js/util.js";
 
 import SelectGroupMulti from "@/components/common/SelectGroupMulti";
 import kqConfirm from "@/components/common/kqConfirm";
-
 import p_icon1 from "@/assets/imgs/kqaddmin/position_bz.svg";
 import p_icon2 from "@/assets/imgs/kqaddmin/position.svg";
 import MapLoader from '../assets/js/AMap'
+import GroupUtil from "../assets/js/GroupUtil";
 let $ = require("jquery");
 let date = new Date();
 let today0 = util.formatData1(date);
@@ -922,7 +954,6 @@ export default {
       kqConfirmTaskId:0,
       kqConfirmUserId:0,
       kqConfirmDate:'',
-
     };
   },
   computed: {},
@@ -1038,6 +1069,7 @@ export default {
         this.schedule_task_id = res.data.list.task_id;
         this.schedule_is_attend = res.data.list.is_attend;
         window.localStorage.setItem("schedule_task_id",res.data.list.task_id);
+        window.localStorage.setItem("schedule_is_attend",res.data.list.is_attend);
         window.localstorage.setItem("schedule_current_user_role_id",res.data.list.current_user_role_id);
       }
     },
@@ -2412,10 +2444,11 @@ export default {
       this.kqConfirmUserId = row.user_id;
       this.kqConfirmDate = row.date;
       this.kqConfirmTaskId = row.task_id;
+      //let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
+      //this.$router.replace(url)
+      this.dialogKqConfirmVisible = true;
+
       let url ='kqConfirmInfo?user_id='+row.user_id+'&date='+row.date+'&task_id='+row.task_id;
-      this.$router.replace(url)
-      //this.dialogKqConfirmVisible = true;
-      
       console.log(url)
       //this.$router.replace(url)
     },
@@ -2571,9 +2604,63 @@ export default {
     // },
     openGroupSelecter () {
       this.$refs.profile.openGroupSelecter();
+      this.getGroupList();
       // this.filterText = ''
       // this.showGroupSelecter = true
       // this.origin_selected_groups = util.getLocalStorage('origin_selected_groups') || []
+    },
+    //获取小组列表
+    getGroupList() {
+      util.ajax({
+        url: "/group/select_list",
+        type: "GET",
+        data: {
+          group_id: 0,
+          team_id: this.team_id,
+          project_id: this.project_id
+        },
+        timeout: 10000,
+        success: obj => {
+          // console.log(obj)
+          if (obj && obj.errno == 0) {
+            this.all_groups = obj.data; // 小组结构
+            //获取动态表单列表
+            // this.customFields=obj.data.form_list.filter(v=>{
+            //   return v.type=='SingleText'||v.type=='Imageview'
+            // });
+            // console.log('customFields>>',this.customFields);
+            //初始化动态表单数据
+            // this.initCustomFields(obj.data.form_list);
+            let cacheGroupList = obj.data;
+            let group = new GroupUtil(cacheGroupList);
+            this.allGroupList = group.formatGroup(group.group); //所有小组，不分结构
+            if (this.dialogImport) {
+              this.ruleForm.importValue = obj.data.base[0].id;
+            }
+          } else {
+            this.$message({
+              showClose: true,
+              message: obj.errmsg,
+              type: "warning"
+            });
+          }
+        },
+        error: (xhr, status) => {
+          this.$message({
+            showClose: true,
+            message: "网络连接失败，请检查网络",
+            type: "warning"
+          });
+        },
+        noNetwork: () => {
+          //网络超时
+          this.$message({
+            showClose: true,
+            message: "网络连接失败，请检查网络",
+            type: "warning"
+          });
+        }
+      });
     },
     confirmGroupSelecter (val) {
       this.selected_groups = val;

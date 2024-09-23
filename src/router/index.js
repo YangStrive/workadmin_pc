@@ -180,6 +180,7 @@ export default new Router({
 				},
 				{
 					path: 'PaydayReport',
+					name: 'PaydayReport',
 					component: (resolve) => require(['@/components/PaydayReport'], resolve)
 				},
 				{
@@ -378,9 +379,9 @@ export default new Router({
 					component: (resolve) => require(['@/components/OutgoingManagement'], resolve)
 				},
 				{
-				path: 'KqConfirminfo',
-				name: 'KqConfirminfo',
-				component: (resolve) => require(['@/components/KqConfirmInfo'], resolve)
+					path: 'KqConfirminfo',
+					name: 'KqConfirminfo',
+					component: (resolve) => require(['@/components/KqConfirmInfo'], resolve)
 				},
 				//新版打卡
 				{
@@ -393,6 +394,26 @@ export default new Router({
 					path: 'billAllowanceManage',
 					name: 'billAllowanceManage',
 					component: (resolve) => require(['@/components/billAllowanceManage'], resolve)
+				},
+				{
+					path: 'AttendanceConfirm',
+					name: 'AttendanceConfirm',
+					component: (resolve) => require(['@/components/AttendanceConfirm'], resolve)
+				},
+				{
+					path: 'HrWorkbench',
+					name: 'HrWorkbench',
+					component: (resolve) => require(['@/components/HrWorkbench'], resolve)
+				},
+				{
+					path: 'SettlementPreview',
+					name: 'SettlementPreview',
+					component: (resolve) => require(['@/components/SettlementPreview'], resolve)
+				},
+				{
+					path: 'SettlementDetail',
+					name: 'SettlementDetail',
+					component: (resolve) => require(['@/components/SettlementDetail'], resolve)
 				},
 			]
 		},

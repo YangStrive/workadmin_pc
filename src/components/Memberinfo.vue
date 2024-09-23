@@ -19,6 +19,7 @@
             <span class="flog">{{
               member_info.member_status == -1
                 ? "离职"
+                : member_info.member_status == 1 ? "待入职" 
                 : member_info.status == 1
                 ? "在职"
                 : "未激活"
@@ -35,7 +36,8 @@
             </span>
           </div>
           <div class="info2" style="margin-bottom: 3px">
-            <span class="job">小组：{{ member_info.group_name }}</span>
+            <span class="job" v-if="is_attend">  部门：{{ member_info.group_name }}</span>
+            <span class="job" v-else>  小组：{{ member_info.group_name }}</span>
             <span class="job">角色：{{ member_info.identity_str }}</span>
             <span class="job" v-if="is_nx_project">人员来源：{{ member_info.worker_source || '-'}}</span>
           </div>
@@ -44,11 +46,13 @@
           </div>
         </div>
         <div class="member_btns">
-          <el-button type="primary" v-if="edit_Pre == 1" @click="updateMemberInfo">编&nbsp;辑</el-button>
+          <el-button type="primary" v-if="edit_Pre == 1 && member_info.member_status==1" @click="updateMemberInfo">入职确认</el-button>
+          <el-button type="primary" v-if="edit_Pre == 1 && member_info.member_status!=1" @click="updateMemberInfo">编&nbsp;辑</el-button>
           <el-button type="primary" v-if="edit_Pre == 1 && member_info.member_status == -1" @click="reEmploy">重新录用</el-button>
-          <el-button type="primary" v-if="edit_Pre == 1 && member_info.member_status != -1 && !member_info.naixue_saas_project_ids_admin" @click="dialogLeave = true">标记离职</el-button>
+          <el-button type="primary" v-if="edit_Pre == 1 && member_info.member_status != -1 && member_info.member_status != 1 && !member_info.naixue_saas_project_ids_admin" @click="dialogLeave = true">标记离职</el-button>
           <el-button type="primary" v-if="edit_Pre == 1 " @click="contractRecord">签约记录</el-button>
           <el-button type="primary" v-if="member_info.is_show_upload_protocol == 1 " @click="uploadProtocol">上传合同</el-button>
+          <el-button type="primary"  v-if="is_attend" @click="changePostion">部门调整</el-button>
           <el-button type="primary" v-if="member_info.is_show_sign_button == 1" @click="checkProtocol">签署合同</el-button>
           <el-popover v-if="member_info.is_show_sign_button == 1" class="sign_tip_item" placement="top-start" title="" width="300" trigger="hover">
             <div class="sign_tip_div">
@@ -161,6 +165,40 @@
                 重新查询
               </span>
             </div>
+          </div>
+          <div class="s_item" v-if="changeList.length>0">
+            <div class="item_left">调动信息</div>
+            <el-table
+              :data="changeList"
+              >
+              <el-table-column
+                label="调动前部门"
+                label-class-name="border"
+                min-width="50"
+              >
+                <template slot-scope="scope">
+                  {{scope.row.current_group_name}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="调动后部门"
+                label-class-name="border"
+                min-width="50"
+              >
+                <template slot-scope="scope">
+                  {{scope.row.target_group_name}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="调动日期"
+                label-class-name="border"
+                min-width="80"
+              >
+                <template slot-scope="scope">
+                  {{scope.row.create_at}}
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </div>
         <div class="section">
@@ -391,11 +429,9 @@
                 "></el-input>
             </el-form-item>
             <el-form-item label="设置角色" prop="identity">
-              <el-select v-model="
-                  ruleForm.identity == 1 ? '超级管理员' : ruleForm.identity
-                " :disabled="
-                  ruleForm.identity == 1 || ruleForm.station_value == 1
-                " placeholder="请选择" class="mystatus">
+              <el-select v-model="ruleForm.identity == 1 ? '超级管理员' : ruleForm.identity" 
+                :disabled="ruleForm.identity == 1 || ruleForm.station_value == 1" 
+                placeholder="请选择" class="mystatus">
                 <el-option v-for="item in roleArr" :key="item.identity_id" :label="item.identity_name" :value="item.identity_id">
                 </el-option>
               </el-select>
@@ -408,11 +444,22 @@
                 </el-switch>
               </el-form-item>
             </div>
-            <el-form-item label="所属小组" prop="group_id">
+            <el-form-item v-if="is_attend" label="所属部门" prop="group_id">
               <el-select v-model="ruleForm.group_id" filterable placeholder="请选择" prop="group_id" class="mystatus" :disabled="ruleForm.identity == 1 || ruleForm.is_supplier == 1 || member_info.naixue_saas_project_ids_admin">
                 <el-option v-for="item in allGroupList" :key="item.id" :label="item.name" :value="item.id">
                 </el-option>
               </el-select>
+            </el-form-item>
+            <el-form-item v-else label="所属小组" prop="group_id">
+              <el-select v-model="ruleForm.group_id" filterable placeholder="请选择" prop="group_id" class="mystatus" :disabled="ruleForm.identity == 1 || ruleForm.is_supplier == 1 || member_info.naixue_saas_project_ids_admin">
+                <el-option v-for="item in allGroupList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="入职日期" class="IDNumber">
+              <el-date-picker v-model="ruleForm.entry_date" type="date" :editable="false" style="width: 251px" :disabled="ruleForm.identity == 1" placeholder="选择日期">
+              </el-date-picker>
             </el-form-item>
             <el-form-item label="开户行全称" class="bankUserName">
               <el-input v-model="ruleForm.bank_info" placeholder="请输入" :disabled="ruleForm.identity == 1"></el-input>
@@ -480,10 +527,6 @@
               <el-date-picker v-model="ruleForm.graduate_date" type="month" :editable="false" style="width: 251px" :disabled="ruleForm.identity == 1" placeholder="选择日期">
               </el-date-picker>
             </el-form-item>
-            <el-form-item label="入职日期" class="IDNumber">
-              <el-date-picker v-model="ruleForm.entry_date" type="date" :editable="false" style="width: 251px" :disabled="ruleForm.identity == 1" placeholder="选择日期">
-              </el-date-picker>
-            </el-form-item>
             <el-form-item label="离职日期" class="IDNumber" v-show="member_info.member_status == -1">
               <el-date-picker v-model="ruleForm.leave_date" type="date" :editable="false" style="width: 251px" :disabled="ruleForm.identity == 1" placeholder="选择日期">
               </el-date-picker>
@@ -524,7 +567,9 @@
         <span slot="footer" class="dialog-footer">
           <el-button @click="resetFormMember('ruleForm')" class="btn1">取 消</el-button>
           <el-button type="success" @click="handleDialogCustomField('open')" class="btn2">自定义选项 </el-button>
-          <el-button type="primary" @click="submitFormMember('ruleForm')" class="btn2">确 定</el-button>
+
+          <el-button type="primary" v-if="member_info.member_status == 1" @click="submitFormMember('ruleForm')" class="btn2">确认并发起合同</el-button>
+          <el-button type="primary" v-else @click="submitFormMember('ruleForm')" class="btn2">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -658,7 +703,7 @@
                               </el-option>
                             </el-select>
                         </el-form-item> -->
-            <el-form-item label="岗位城市" prop="id" v-if="contract_mode != 2"> 
+            <el-form-item label="岗位城市" prop="id" v-if="contract_mode != 2">
               <el-select v-model="ruleForm2.id" @change="changeStationFn" placeholder="请选择" class="mystatus" filterable>
                 <el-option v-for="item in stationList" :key="item.id" :label="item.name" :value="item.id">
                 </el-option>
@@ -800,13 +845,48 @@
         <violation :user_id="this.member_user_id" :project_id="this.project_id"></violation>
       </div>
     </div>
+    <!-- 部门调整弹窗 -->
+    <div class="protocol_dialog dialog-addmember">
+      <el-dialog title="部门调整" :visible.sync="dialogPostion" @close="resetForm('ruleForm3')">
+        <div class="">
+          <el-form :model="ruleForm3" :rules="rules3" ref="ruleForm3" label-width="90px" class="demo-ruleForm">
+            <el-form-item label="调整员工">
+              <el-input v-model="ruleForm3.real_name" placeholder="请输入" :disabled="
+                  ruleForm3.identity == 1 || ruleForm3.real_name_auth == 1
+                "></el-input>
+            </el-form-item>
+            <el-form-item label="当前部门">
+              <el-select v-model="ruleForm3.current_group_id" filterable placeholder="请选择" prop="current_group_id" class="mystatus"  :disabled="true">
+                <el-option v-for="item in allGroupList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+         </el-form-item>
+            <el-form-item label="调整后部门"  >
+              <el-select v-model="ruleForm3.target_group_id" filterable placeholder="请选择" prop="target_group_id" class="mystatus" >
+                <el-option v-for="item in allGroupList" :key="item.id" :label="item.full_name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="canceldialogPostion" class="btn1">取 消</el-button>
+          <el-button type="primary" :disabled="submitDisabled" @click="submitPostion('ruleForm3')" class="btn2">确定</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
+
+
 </template>
 <script>
 import $ from "jquery";
-import * as util from "@/assets/js/util.js";
+
 import GroupUtil from "../assets/js/GroupUtil.js";
 import formFields from '../assets/js/formFields.js'
+import * as util from "../assets/js/util.js";
+import SelectGroupMulti from "@/components/common/SelectGroupMulti";
+
 
 import breadcrumb from "@/components/common/breadcrumb";
 import QRCode from "qrcode";
@@ -818,7 +898,6 @@ import SingleText from '@/components/common/dynamicForm/SingleText';
 import Imageview from '@/components/common/dynamicForm/Imageview';
 import violation from './violation';
 
-
 // let idnumberReg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
 let numberReg = /^\d+(\.\d+)?$/;
 
@@ -829,7 +908,8 @@ export default {
     elUpload,
     SingleText,
     Imageview,
-    violation
+    violation,
+    SelectGroupMulti,
   },
   mixins: [elUploadMixin, htmlToPdfMixin],
   data() {
@@ -894,6 +974,7 @@ export default {
       project_id: 0,
       project_type: 0,
       contract_mode:0,  // 签约模式
+      is_attend:false,  // 签约模式
       member_user_id: 0,
       protocol_id: 0,
       protocol_name: '',
@@ -908,6 +989,7 @@ export default {
       dialogContractRecord: false, //签约记录弹窗
       dialogResetProtocol: false, //重置合同弹窗
       dialogRefund: false, //退薪弹窗
+      dialogPostion:false,//调动申请
       edit_Pre: 0, //编辑权限
       is_open_supplier: 0, //是否开启费用结算
       link: "",
@@ -976,6 +1058,12 @@ export default {
         store: [{ required: true, message: "请选择门店", trigger: "change" }],
         jobStation: [{ required: true, message: "请选择岗位", trigger: "change" }],
       },
+      all_groups: [], // 分组管理--tree树形小组数据
+      defaultProps: {
+        //分组管理--树形小组数据--默认值
+        children: "children",
+        label: "name"
+      },
       stationList2: [],
       stationList: [
         // {
@@ -997,6 +1085,7 @@ export default {
       cityStationList: [],
       storeList: [],         // 门店
       jobStationList: [],    // 岗位列表
+      selected_groups: [], //已选择的小组
       submitDisabled: false,
       ruleForm: {
         station_value: "",
@@ -1107,6 +1196,15 @@ export default {
           }
         },
       },
+      ruleForm3: {
+        user_id:"",
+        real_name: "",
+        current_group_id: "", //岗位
+        target_group_id: "",
+      },
+      rules3: {
+        target_group_id: [{ required: true, message: "请选择调整后部门", trigger: "change" }],
+      },
       allGroupList: [], //所有小组列表--select下拉框选择
       roleArr: [], // 所有角色列表
       idnumberReg: false,
@@ -1131,6 +1229,7 @@ export default {
         region: '',
       },
       detailCustomFields:[],
+      changeList:[],
       customFields:[],
       submitCustomFields:[],
       oGroup_id:'',
@@ -1153,6 +1252,10 @@ export default {
       },
       is_show_shop: false,
       contract_record: [],
+      selectAllGroupList:[],
+      selectGroupId:"",
+      current_group_id:"", // 用于存储选中的选项的id
+      targent_group_id:"", // 用于存储选中的选项的id
     };
   },
   methods: {
@@ -1207,6 +1310,7 @@ export default {
           if (obj && obj.errno == 0) {
             this.project_type = obj.data.list.project_type;
             this.contract_mode = obj.data.list.contract_mode;
+            this.is_attend = obj.data.list.is_attend;
             console.log("project_type:" + this.project_type);
             console.log("contract_mode:" + this.contract_mode);
             this.current_user_role_id = obj.data.list.current_user_role_id;
@@ -1283,6 +1387,7 @@ export default {
             });
             //获取动态表单数据
             this.detailCustomFields=data.form_list;
+            this.changeList = data.change_list;
             //格式化学历
             this.degreeArr.forEach((i) => {
               if (i.id == data.degree) {
@@ -2102,13 +2207,13 @@ export default {
             wage_day: this.ruleForm2.wage_day || 10,
           };
 
-          
-          if (typeof curStation!== 'undefined') { 
+
+          if (typeof curStation!== 'undefined') {
             _data.city_id = curStation.city_id
             _data.city_name = curStation.city_name
             _data.station_id = curStation.station_id
             _data.station_name = curStation.station_name
-          } else { 
+          } else {
             _data.city_id = 0
             _data.city_name = ''
             _data.station_id = 0
@@ -3040,6 +3145,7 @@ export default {
         success: (obj) => {
           // console.log(obj)
           if (obj && obj.errno == 0) {
+            this.all_groups = obj.data; // 小组结构
             let cacheGroupList = obj.data;
             let group = new GroupUtil(cacheGroupList);
             this.allGroupList = group.formatGroup(group.group); //所有小组，不分结构
@@ -3410,6 +3516,85 @@ export default {
       },
     });
   },
+    openGroupSelecter() {
+      //获取小组列表
+      this.getGroupList();
+      //this.$refs.profile.openGroupSelecter();
+      this.dialogGroupSelect = true;
+    },
+    //调动申请
+    changePostion(){
+      let curr_identity = "";
+      this.roleArr.forEach((item) => {
+        if (this.member_info.identity == item.identity_id) {
+          curr_identity = item.identity_id;
+        }
+      });
+      this.ruleForm3 = {
+        user_id: this.member_info.user_id,
+        mobile: this.member_info.mobile,
+        real_name: this.member_info.real_name,
+        current_group_id: this.member_info.group_id,
+        identity: curr_identity ? curr_identity : this.member_info.identity_str,
+        real_name_auth: this.member_info.real_name_auth,
+      };
+      this.dialogPostion = true;
+    },
+    canceldialogPostion(){
+      this.dialogPostion = false;
+    },
+    submitPostion(formName){
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          let _data = {
+            team_id: this.team_id,
+            project_id: this.project_id,
+            to_user_id: this.member_user_id,
+            current_group_id: this.ruleForm3.current_group_id,
+            target_group_id: this.ruleForm3.target_group_id,
+          };
+          console.log(_data);
+          util.ajax({
+            url: "/changestore/postion_apply",
+            type: "POST",
+            data: _data,
+            timeout: 10000,
+            success: (obj) => {
+              if (obj && obj.errno == 0) {
+                this.$message({
+                  showClose: true,
+                  message: "处理成功",
+                  type: "success",
+                });
+                this.dialogPostion = false;
+                this.getMemberInfo();
+              } else {
+                this.$message({
+                  showClose: true,
+                  message: obj.errmsg,
+                  type: "warning",
+                });
+              }
+            },
+            error: (xhr, status) => {
+              this.$message({
+                showClose: true,
+                message: "网络连接失败，请检查网络",
+                type: "warning",
+              });
+            },
+            noNetwork: () => {
+              //网络超时
+              this.$message({
+                showClose: true,
+                message: "网络连接失败，请检查网络",
+                type: "warning",
+              });
+            },
+          });
+        }
+      });
+    },
   },
   mounted() {
     this.init();
@@ -3420,6 +3605,9 @@ export default {
       // 对路由变化作出响应...
       this.init()
       this.getIsNxProject();
+    },
+    filterText(val) {
+      this.$refs.all_groups.filter(val);
     },
     "ruleForm.group_id"(){
       console.log('changeeeee');
@@ -4034,5 +4222,23 @@ export default {
   height: 450px;
   margin-bottom: 40px;
 }
+.indent-level {
+  /* 通过增加左边距来模拟层级缩进 */
+  padding-left: 20px; /* 或者使用其他单位，根据需要调整 */
+}
+
+/* 进一步的样式调整，比如改变字体大小或颜色等 */
+.indent-level .el-option__label {
+  font-size: 14px; /* 示例字体大小 */
+  color: #666; /* 示例字体颜色 */
+}
+.indent-0 { margin-left: 0px; }
+.indent-1 { margin-left: 0px; }
+.indent-2 { margin-left: 3px; }
+.indent-3 { margin-left: 7px; }
+.indent-4 { margin-left: 10px; }
+.indent-5 { margin-left: 13px; }
+.indent-6 { margin-left: 16px; }
+.indent-7 { margin-left: 19px; }
 
 </style>

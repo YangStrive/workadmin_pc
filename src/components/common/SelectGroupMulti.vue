@@ -2,18 +2,25 @@
   	<div class="SelectGroupMulti">
     	<!-- 选择小组弹窗 -->
     	<div class="select_group">
-    	  <el-dialog title="选择小组" :visible.sync="showGroupSelecter" :close-on-press-escape="false">
+    	  <el-dialog :title="getTitle()" :visible.sync="showGroupSelecter" :close-on-press-escape="false">
     	    <div class="select_group_main">
     	      <div class="all_groups_box">
-    	        <p class="title">选择小组</p>
+    	        <p class="title"  v-if="is_attend">选择部门</p>
+              <p class="title" v-else>选择小组</p>
     	        <div class="all_search">
     	          <i class="el-icon-search"></i>
     	          <el-input
     	            :icon='filterText?"circle-cross":""'
     	            :on-icon-click="clearFilterText"
-    	            placeholder="搜索小组"
-    	            v-model="filterText">
+    	            placeholder="搜索部门"
+    	            v-model="filterText" v-if="is_attend">
     	          </el-input>
+                <el-input
+                  :icon='filterText?"circle-cross":""'
+                  :on-icon-click="clearFilterText"
+                  placeholder="搜索小组"
+                  v-model="filterText" v-else>
+                </el-input>
     	        </div>
     	        <div class="all_main">
     	          <el-tree
@@ -29,7 +36,8 @@
     	        </div>
     	      </div>
     	      <div class="selected_groups_box">
-    	        <p class="title">已选择的小组</p>
+    	        <p class="title" v-if="is_attend">已选择的部门</p>
+              <p class="title" v-else>已选择的小组</p>
     	        <div class="sel_main">
     	          <template v-for="(item, index) in origin_selected_groups">
     	            <div class="sel_item" @click="unSelectGroup(index)">
@@ -67,7 +75,10 @@ export default {
 				label: 'name'
       		},
       		origin_selected_groups: [],//上次选择的小组，在缓存中，如需清空，直接清空缓存即可
-      		selectedGroups: []
+      		selectedGroups: [],
+        is_attend:0,
+          team_id: 0,
+          project_id: 0,
     	}
   	},
   	// props: {
@@ -91,7 +102,9 @@ export default {
   	},
   	methods: {
     	init() {
-      
+        this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
+        this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
+        this.getOverview();
     	},
     	clearFilterText(){
           	this.filterText = ''
@@ -126,8 +139,40 @@ export default {
 			this.filterText = ''
 			this.showGroupSelecter = true
 			this.origin_selected_groups = util.getLocalStorage('origin_selected_groups') || []
-          
         },
+      getTitle() {
+        if (this.is_attend) {
+          return '选择部门';
+        }else{
+          return '选择小组';
+        }
+
+      },
+      getOverview() {
+        util.ajax({
+          url: '/project/overview',
+          type: 'GET',
+          data: {
+            team_id: this.team_id,
+            project_id: this.project_id
+          },
+          timeout: 10000,
+          success: (obj) => {
+            if (obj && obj.errno == 0) {
+              this.project_type = obj.data.list.project_type;
+              this.contract_mode = obj.data.list.contract_mode;
+              this.is_attend = obj.data.list.is_attend;
+              console.log("project_type:" + this.project_type);
+              console.log("contract_mode:" + this.contract_mode);
+              this.current_user_role_id = obj.data.list.current_user_role_id;
+            }
+          },
+          error: (xhr, status) => {
+          },
+          noNetwork: () => {
+          }
+        })
+      },
   	},
   	mounted() {
     	this.init()

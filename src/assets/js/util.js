@@ -1,8 +1,8 @@
 import $ from 'jquery'
 
 
-//export const host = '//work.doumi.com'
-export const host = '';
+export const host = '//work.doumi.com'
+//export const host = '';
  //export const host = '//saas-test.doumi.com'
 
 //请求B端接口host

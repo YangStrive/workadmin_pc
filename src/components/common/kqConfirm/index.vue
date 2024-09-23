@@ -66,6 +66,18 @@ export default {
       type: Function,
       default: () => {},
     },
+    kqConfirmTaskId: {
+      type: Number,
+      default: 0,
+    },
+    kqConfirmUserId: {
+      type: Number,
+      default: 0,
+    },
+    kqConfirmDate: {
+      type: String,
+      default: "",
+    },
   },
   data () {
     let _this = this;
@@ -210,9 +222,9 @@ export default {
       //获取用户信息
       this.team_id = util.getLocalStorage("projectStorageInfo").team_id;
       this.project_id = util.getLocalStorage("projectStorageInfo").project_id;
-      this.task_id = this.GetQueryString('task_id');
-      this.user_id = this.GetQueryString('user_id');
-      this.getAttendanceInfo(this.GetQueryString('date'));
+      this.task_id = this.kqConfirmTaskId;
+      this.user_id = this.kqConfirmUserId;
+      this.getAttendanceInfo(this.kqConfirmDate);
     },
     GetQueryString(name) {
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
@@ -221,15 +233,15 @@ export default {
       return null;
     },
     getAttendanceInfo(date) {
-      let task_id = this.GetQueryString('task_id')
+      let task_id = this.kqConfirmTaskId
       util.ajax({
         url: "/attendance/detail",
         type: "GET",
         data: {
-          user_id: this.GetQueryString('user_id'),
+          user_id: this.user_id,
           team_id: this.team_id,
           project_id: this.project_id,
-          task_id: this.GetQueryString('task_id'),
+          task_id: this.task_id,
           date: date
         },
         success: res => {
@@ -381,6 +393,11 @@ export default {
               type: "success",
             });
             this.$router.replace("kqaddmin");
+          }else {
+            this.$message({
+              type: 'error',
+              message:res.errmsg
+            });
           }
         },
         error: (xhr, status) => { },

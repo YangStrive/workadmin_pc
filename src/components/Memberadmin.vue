@@ -21,13 +21,13 @@
       <div class="seach-cout">
         <el-form label-width="40px" style="display:flex;flex-wrap:wrap;">
           <div class="from-item-list">
-            <el-form-item label="小组：">
+            <el-form-item v-if="is_attend" label="部门：">
               <el-button
                 class="group"
                 style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
                 @click="openGroupSelecter"
                 v-if="selected_groups.length != 0"
-              >已选{{selected_groups.length}}个小组<i
+              >已选{{selected_groups.length}}个部门<i
                   class="el-icon-caret-bottom"
                   style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"
                 ></i></el-button>
@@ -40,6 +40,26 @@
                   class="el-icon-caret-bottom"
                   style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"
                 ></i></el-button>
+            </el-form-item>
+            <el-form-item v-else label="小组：">
+              <el-button
+                class="group"
+                style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
+                @click="openGroupSelecter"
+                v-if="selected_groups.length != 0"
+              >已选{{selected_groups.length}}个小组<i
+                class="el-icon-caret-bottom"
+                style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"
+              ></i></el-button>
+              <el-button
+                class="group"
+                style="width:135px;background: #fff;color: #1f2d3d;text-align: left;border-radius: 2px;"
+                @click="openGroupSelecter"
+                v-else
+              >全部<i
+                class="el-icon-caret-bottom"
+                style="position: absolute; right: 12px;top: 14px;color: #d3dce6;"
+              ></i></el-button>
             </el-form-item>
           </div>
           <div class="from-item-list">
@@ -605,7 +625,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="所属小组"
+            v-if="is_attend" label="所属部门"
             show-overflow-tooltip
             label-class-name="border"
             min-width="150"
@@ -615,6 +635,19 @@
               <span>{{ scope.row.group_name }}</span>
             </template>
           </el-table-column>
+
+          <el-table-column
+            v-else label="所属小组"
+            show-overflow-tooltip
+            label-class-name="border"
+            min-width="150"
+          >
+            <template slot-scope="scope">
+              <el-icon name="group"></el-icon>
+              <span>{{ scope.row.group_name }}</span>
+            </template>
+          </el-table-column>
+
           <el-table-column
             label="所属供应商"
             show-overflow-tooltip
@@ -908,7 +941,14 @@
                   <span :style="'width:'+speed+'%'"></span>
                 </div>
               </div>
-
+              <div
+                style="width:340px;"
+                v-if="progressInfo"
+              >
+                <div class="file_text">
+                  <span :style="'color:red'">{{ progressInfo }}</span>
+                </div>
+              </div>
             </div>
           </el-form>
         </div>
@@ -996,7 +1036,28 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              label="所属小组"
+              v-if="is_attend" label="所属部门"
+              prop="group_id"
+            >
+              <el-select
+                v-model="ruleForm.group_id"
+                filterable
+                placeholder="请选择"
+                prop="group_id"
+                class="mystatus"
+                :disabled="ruleForm.identity == 1"
+              >
+                <el-option
+                  v-for="item in allGroupList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-else label="所属小组"
               prop="group_id"
             >
               <el-select
@@ -1337,13 +1398,13 @@
               </div>
             </el-form-item>
             <el-form-item label="身份证照片" v-if="false">
-              <elUpload :width="255" :limitCount="2" ref="uploadRef" :elTips="elTips" @getNewFileListFun="getNewFileListFun2" :fileListValue="contractFile2"></elUpload>  
+              <elUpload :width="255" :limitCount="2" ref="uploadRef" :elTips="elTips" @getNewFileListFun="getNewFileListFun2" :fileListValue="contractFile2"></elUpload>
             </el-form-item>
             <template v-if="customFields.length>0">
               <el-form-item :label="item.name" v-for="(item, number) in customFields" :key="item.id">
-                <component 
-                  :is="item.type" 
-                  :item="item" 
+                <component
+                  :is="item.type"
+                  :item="item"
                   :number="number"
                   @changeComponent="changeComponentHandle">
                 </component>
@@ -2194,6 +2255,7 @@ export default {
       }
     };
     return {
+      is_attend:false,
       searchData: {},
       leave_data: {
         leave_date: new Date(),
@@ -2328,6 +2390,10 @@ export default {
         {
           id: 1,
           text: "在职"
+        },
+        {
+          id: 2,
+          text: "待入职"
         },
         {
           id: -1,
@@ -2537,6 +2603,7 @@ export default {
       addition_amount: 0,
       reduce_amount: 0,
       is_show_shop: false,
+      batchNo:'',
     };
   },
   computed: {},
@@ -2644,6 +2711,7 @@ export default {
             this.ruleForm2 = this.initProtocolForm
             this.isSuperAdmin = res.data.list.current_user_role_id;   // 3是项目超级管理员
             this.is_show_shop = res.data.list.is_show_shop;
+            this.is_attend = res.data.list.is_attend;
           }
         },
         error: (xhr, status) => {},
@@ -2670,11 +2738,11 @@ export default {
         timeout: 10000,
         success: (obj) => {
           if (obj && obj.errno == 0) {
-              this.getStationList(); 
+              this.getStationList();
               this.dialogBatchProtocol = true;
               console.log('this.is_show_shop===', this.is_show_shop)
               if(this.is_show_shop) {
-                this.getEmployercompanyFun() 
+                this.getEmployercompanyFun()
               }
           } else {
             this.$message({
@@ -2772,12 +2840,12 @@ export default {
             wage_day: this.ruleForm2.wage_day || 10,
           }
 
-          if (typeof curStation!== 'undefined') { 
+          if (typeof curStation!== 'undefined') {
             _data.city_id = curStation.city_id
             _data.city_name = curStation.city_name
             _data.station_id = curStation.station_id
             _data.station_name = curStation.station_name
-          } else { 
+          } else {
             _data.city_id = 0
             _data.city_name = ''
             _data.station_id = 0
@@ -3051,6 +3119,8 @@ export default {
         showLevel = 0;
       } else if (this.fromData.statusValue == 1) {
         showLevel = 1;
+      } else if (this.fromData.statusValue == 2) {
+        showLevel = 2;
       } else if (this.fromData.statusValue == -1) {
         showLevel = -1;
       }else if (this.fromData.statusValue == -2) {
@@ -3173,7 +3243,7 @@ export default {
             this.all_groups = obj.data; // 小组结构
             //获取动态表单列表
             // this.customFields=obj.data.form_list.filter(v=>{
-            //   return v.type=='SingleText'||v.type=='Imageview' 
+            //   return v.type=='SingleText'||v.type=='Imageview'
             // });
             // console.log('customFields>>',this.customFields);
             //初始化动态表单数据
@@ -3232,7 +3302,7 @@ export default {
               return;
             }
             this.customFields=data.filter(v=>{
-              return v.type=='SingleText'||v.type=='Imageview' 
+              return v.type=='SingleText'||v.type=='Imageview'
             });
             //初始化动态表单数据
             this.initCustomFields(data);
@@ -3264,7 +3334,7 @@ export default {
     //初始化动态表单
     initCustomFields(data){
       let newData=data.filter(v=>{
-        return v.type=='SingleText'||v.type=='Imageview' 
+        return v.type=='SingleText'||v.type=='Imageview'
       });
       console.log('ggggg',newData);
       if(this.submitCustomFields.length>0){
@@ -4396,7 +4466,7 @@ export default {
       }else if(this.leave_data.change_radio=='被动离职'){
         this.elTips="上传离职协议/仲裁裁决书,单个文件不能大于5M"
       }
-      
+
     },
     //获取离职原因
     getLeaveReason() {
@@ -5078,7 +5148,7 @@ export default {
                     type: 'warning'
                   });
               }
-          },   
+          },
           error: (xhr, status) => {
               this.$message({
                 showClose: true,
@@ -5393,8 +5463,9 @@ export default {
             timeout: 10000,
             success: obj => {
               // console.log(obj)
-              this.dialogImport = false;
+
               if (obj && obj.errno == 0) {
+                this.dialogImport = false;
                 this.loadingImport = false;
                 if (obj.data.error_list.length == 0) {
                   this.$message({
@@ -5406,9 +5477,22 @@ export default {
                   this.currentPage = 1;
                   this.getMemberList();
                 }
-                if (obj.data.error_list.length > 0) {
+                if (obj.data.is_async == 0 && obj.data.error_list.length > 0) {
+                  this.dialogImport = false;
                   util.setLocalStorage("memberErrorList", obj.data);
                   this.$router.replace("membererror");
+                }else if(obj.data.is_async == 1){
+                  this.dialogImport = true;
+                  this.progressInfo = "正在处理数据中，请耐心等待~";
+                  this.batchNo = obj.data.batch_no;
+                  let _time = 0;
+                  this.timer = setInterval(() => {
+                    _time++;
+                    if (_time > 199) {
+                      clearInterval(this.timer)
+                    };
+                    this.getUploadCurrProgress(this.batchNo);
+                  }, 1000)
                 }
                 document.getElementById("upfile").reset();
               }else if(obj && obj.errno == 38000){
@@ -5419,6 +5503,7 @@ export default {
                     console.log('action批量导入===', action)
                   }
                 })
+                this.dialogImport = false;
                 this.loadingImport = false;
                 document.getElementById("upfile").reset();
               } else {
@@ -5460,6 +5545,7 @@ export default {
       this.$refs[formName].resetFields();
       this.dialogImport = false;
       this.file_text = "";
+      this.progressInfo = "";
       this.file_speed = false;
       this.speed = 60;
       clearInterval(interval);
@@ -5538,7 +5624,7 @@ export default {
           // this.getMemberList();
           // return false;
         }
-        
+
         if (
           this.fromData.currSeachRester.user_id &&
           this.states &&
@@ -6227,6 +6313,61 @@ export default {
         console.log('this.is_nx_project===getIsNxProject', this.is_nx_project)
         this.getPermissions()
       }, 800)
+    },
+    // 获取上传结果
+    getUploadCurrProgress(batchNo) {
+      util.ajax({
+        url: '/group/upload_member_result',
+        type: 'GET',
+        data: {
+          team_id: this.team_id,
+          project_id: this.project_id,
+          batch_no:batchNo
+        },
+        timeout: 10000,
+        success: (res) => {
+          if (res.errno == 0 && res.data.is_handle_complete == 0) {
+            this.progressInfo = "正在处理数据中，请耐心等待~";
+          } else if(res.errno == 0 && res.data.is_handle_complete == 1){
+            this.dialogImport = false;
+            this.loadingImport = false;
+            clearInterval(this.timer);
+            if (res.data.error_list.length == 0) {
+              this.$message({
+                message: "导入成功",
+                type: "success"
+              });
+              this.page_no = 1;
+              this.currentPage = 1;
+              this.getMemberList();
+            }else if (res.data.error_list.length > 0) {
+              clearInterval(this.timer);
+              this.progressInfo = "导入完成~";
+              util.setLocalStorage("memberErrorList", res.data);
+              this.$router.replace("membererror");
+            }
+          }
+        },
+        error: (xhr, status) => {
+          this.successVisible = false;
+          clearInterval(this.timer);
+          this.$message({
+            showClose: true,
+            message: '网络连接失败，请检查网络',
+            type: 'warning'
+          });
+        },
+        noNetwork: () => {
+          this.successVisible = false;
+          clearInterval(this.timer);
+          //网络超时
+          this.$message({
+            showClose: true,
+            message: '网络连接失败，请检查网络',
+            type: 'warning'
+          });
+        }
+      })
     },
   },
   created() {},

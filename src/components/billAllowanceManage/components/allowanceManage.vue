@@ -17,9 +17,9 @@
 				</el-form-item>
 				<el-form-item label="人员">
 					<!--搜索人员 运行手动清除-->
-					<el-select 
-					v-model="searchForm.user_id" 
-					placeholder="请输入关键词" 
+					<el-select
+					v-model="searchForm.user_id"
+					placeholder="请输入关键词"
 					filterable
 					remote
 					clearable
@@ -59,13 +59,14 @@
 			>
 				<el-table-column prop="worker_name" label="姓名" width="100"></el-table-column>
 				<el-table-column prop="worker_phone" label="手机号" width="120"></el-table-column>
+        <el-table-column prop="attendancedate" label="考勤日期" width="120"></el-table-column>
 				<el-table-column prop="r_type" label="费用类型" width="100">
 					<template slot-scope="scope">
 						{{scope.row.r_type == 10 ? '奖金' : '津贴'}}
 					</template>
 				</el-table-column>
 				<el-table-column prop="amount" label="金额(元)" width="150"></el-table-column>
-				<el-table-column prop="pay_status" label="结算状态" width="100"></el-table-column>
+				<el-table-column prop="pay_status_text" label="结算状态" width="100"></el-table-column>
 				<el-table-column prop="remarks" label="说明"></el-table-column>
 				<el-table-column label="操作" width="100">
 					<template slot-scope="scope" v-if="scope.row.pay_status == 0">
@@ -74,7 +75,7 @@
 					</template>
 				</el-table-column>
 			</el-table>
-			
+
 			<div class="pagination-table" v-if="total_num / page_size > 1">
 				<el-pagination
 					@current-change="handleSizeChange"
@@ -88,7 +89,7 @@
 		</div>
 
 		<!-- 编辑奖金津贴 -->
-		<el-dialog 
+		<el-dialog
 			title="编辑"
 			:visible.sync="dialogVisibleEdit"
 			size="tiny"
@@ -120,7 +121,7 @@
 		</el-dialog>
 
 		<!-- 新建奖金津贴 -->
-		<el-dialog 
+		<el-dialog
 			title="新建"
 			:visible.sync="dialogVisibleAdd"
 			size="tiny"
@@ -137,10 +138,10 @@
 						></el-date-picker>
 					</el-form-item>
 					<el-form-item label="人员" prop="user_id">
-						<el-select 
+						<el-select
 							style="width: 100%;"
-							v-model="addForm.user_id" 
-							placeholder="请输入关键词" 
+							v-model="addForm.user_id"
+							placeholder="请输入关键词"
 							clearable
 							remote
 							filterable
@@ -292,7 +293,7 @@ export default {
 						})
 					}
 				} catch (error) {
-					
+
 				}finally{
 					this.searchPersonloading = false;
 				}
@@ -414,7 +415,7 @@ export default {
 					});
 				}
 			} catch (error) {
-				
+
 			}
 		},
 
@@ -426,8 +427,8 @@ export default {
 				cancelButtonText: '取消',
 				type: 'warning'
 			}).then(() => {
-				this.submitDeleteRecord(row.id);    
-			}).catch(() => {        
+				this.submitDeleteRecord(row.id);
+			}).catch(() => {
 			});
 		},
 
@@ -459,7 +460,7 @@ export default {
 				}
 
 			} catch (error) {
-				
+
 			}
 		},
 
@@ -514,7 +515,7 @@ export default {
 					});
 				}
 			} catch (error) {
-				
+
 			}
 		},
 
@@ -550,7 +551,7 @@ export default {
 						});
 					}
 				} catch (error) {
-					
+
 				}
 		}
 

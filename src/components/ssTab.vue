@@ -11,7 +11,10 @@
       <el-tab-pane label="停保名单" name="3">
         <ssTabStop ref="ssTabStopRef"></ssTabStop>
       </el-tab-pane>
-      <el-tab-pane label="账单管理" name="4">
+      <el-tab-pane label="预缴管理" name="5">
+        <prepaymentManagement ref="prepaymentManagement"/>
+      </el-tab-pane>
+      <el-tab-pane label="实缴管理" name="4">
         <ssTabBill ref="ssTabBillRef"></ssTabBill>
       </el-tab-pane>
     </el-tabs>
@@ -24,13 +27,16 @@ import SocialSecurity from './SocialSecurity.vue';
 import ssTabIn from './ssTabIn.vue';
 import ssTabStop from './ssTabStop.vue';
 import ssTabBill from './ssTabBill.vue';
+import prepaymentManagement from './PrepaymentManagement.vue';
+
 export default {
   name: "",
   components: {
     SocialSecurity,
     ssTabIn,
     ssTabStop,
-    ssTabBill
+    ssTabBill,
+    prepaymentManagement
   },
   props: {},
   data() {
@@ -62,6 +68,8 @@ export default {
         this.$refs.ssTabStopRef.init();
       } else if(tab.name === '4') {
         this.$refs.ssTabBillRef.init();
+      }else if(tab.name === '5') {
+        this.$refs.prepaymentManagement.init();
       }
     }
   },

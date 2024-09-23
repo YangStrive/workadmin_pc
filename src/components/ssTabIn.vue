@@ -51,6 +51,7 @@
           <el-button type="primary" @click="goAdd">新增</el-button>
           <el-button type="primary" @click="withdraw">撤回报增</el-button>
           <el-button type="primary" @click="downSizing">减员</el-button>
+          <el-button type="primary" @click="handleClickCreateRecon">创建对账单</el-button>
         </span>
         <span class="operate_wrap">
           <el-button class="batchBtn" type="text" @click="addImport">
@@ -970,6 +971,35 @@ export default {
         }
       })
     },
+
+    handleClickCreateRecon(){
+      util.ajax({
+        url: '/common/district/get',
+        data: data,
+        type: 'GET',
+        success: (res) => {
+          if (res.errno == '0') {
+            this.districtCounty_list = res.data
+          } else {
+            this.$message({
+              message: res.errmsg,
+              type: "error",
+            });
+          }
+        },
+        error: (xhr, status) => {
+          console.log('xhr==', xhr)
+        },
+        noNetwork: () => {
+          this.$message({
+            showClose: true,
+            message: '网络连接失败，请检查网络',
+            type: 'warning'
+          });
+        }
+      })
+
+    }
   },
 }
 </script>

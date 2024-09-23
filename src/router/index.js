@@ -415,6 +415,11 @@ export default new Router({
 					name: 'SettlementDetail',
 					component: (resolve) => require(['@/components/SettlementDetail'], resolve)
 				},
+				{
+					path: 'StatementDetails',
+					name: 'StatementDetails',
+					component: (resolve) => require(['@/components/StatementDetails'], resolve)
+				}
 			]
 		},
 		{

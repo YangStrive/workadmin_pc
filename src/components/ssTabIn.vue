@@ -269,6 +269,30 @@
         <el-button type="primary" @click="sureClose" :disabled="canClosed">关 闭</el-button>
       </span>
     </el-dialog>
+
+    
+    <el-dialog
+      title="请选月份"
+      custom-class="dialog-addS"
+      :visible.sync="dialogAddS"
+      size= "tiny"
+      @close="resetForm('ruleForm')">
+        <div style="margin-top: 24px;">
+          <el-form :model="createForm" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
+          <el-form-item label="月份：" prop="month" >
+            <el-date-picker
+              v-model="createForm.month"
+              type="month"
+              placeholder="选择月">
+            </el-date-picker>
+          </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer footerdiv">
+            <el-button @click="resetForm('ruleForm')">取 消</el-button>
+            <el-button type="primary" @click="submitForm('ruleForm')">创 建</el-button>
+          </span>
+        </div>
+    </el-dialog>
     <!-- 新增导入 -->
     <ssImpot ref="importRef" :dialogTitle="'新增导入'" :tempHref="searchData.batch_add_ss" :requestUrl="requestUrl_add" :resultUrl="resultUrl_add" @updateListFun="updateListFun"></ssImpot>
     <!-- 批量减员 -->
@@ -346,7 +370,17 @@ export default {
       remarkForm: {
         mark: ''
       },
-      remarkDialog: false
+      remarkDialog: false,
+      dialogAddS: false,
+      createForm: {
+        month: ''
+      },
+      rules: {
+        month: [
+          { required: true, message: '请选择月份', trigger: 'blur',type:'date'}
+        ]
+      },
+
     }
   },
   computed: {
@@ -973,33 +1007,62 @@ export default {
     },
 
     handleClickCreateRecon(){
-      util.ajax({
-        url: '/common/district/get',
-        data: data,
-        type: 'GET',
-        success: (res) => {
-          if (res.errno == '0') {
-            this.districtCounty_list = res.data
-          } else {
-            this.$message({
-              message: res.errmsg,
-              type: "error",
-            });
-          }
-        },
-        error: (xhr, status) => {
-          console.log('xhr==', xhr)
-        },
-        noNetwork: () => {
-          this.$message({
-            showClose: true,
-            message: '网络连接失败，请检查网络',
-            type: 'warning'
-          });
-        }
-      })
+      this.dialogAddS = true;
+      //this.ruleForm.month = ''
+    },
 
-    }
+    // 创建提交
+    submitForm(formName) {
+      console.log('valid==', 'valid')
+      this.$refs[formName].validate((valid) => {
+        console.log('valid==', valid)
+        if (valid) {
+          ///ss/accountstatement/make
+          util.ajax({
+            url:'/ss/accountstatement/make',
+            type:'POST',
+            data:{
+              team_id: this.team_id,
+              project_id: this.project_id,
+              month: util.getLocalTime(this.createForm.month,'yyyy-MM'),
+              is_save: 1,
+            },
+            timeout:10000,
+            success:(obj) => {
+              if(obj && obj.errno == 0){
+                this.$message({
+                  showClose: true,
+                  message: '创建成功',
+                  type: 'success'
+                });
+                this.dialogAddS = false
+                this.getList();
+              }else{
+                this.$message({
+                  showClose: true,
+                  message: obj.errmsg,
+                  type: 'warning'
+                });
+              }
+            },   
+            error: (xhr, status) => {
+              
+            },
+            noNetwork: () => {
+              //网络超时
+            }
+          })
+        } else {
+          // console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    //取消
+    resetForm(formName) {
+        this.dialogAddS = false
+        this.$refs[formName].resetFields();
+    },
   },
 }
 </script>
@@ -1061,5 +1124,8 @@ export default {
 }
 .form_wrap .el-table__fixed,.el-table__fixed-right {
   height: 442px;
+}
+.el-dialog__wrapper .dialog-addS{
+  width: 400px;
 }
 </style>

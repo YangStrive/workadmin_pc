@@ -23,10 +23,10 @@
       </div>
       <div class="table_wrap">
         <div class="table_operate">
-          <!-- 操作：
+          操作：
           <span>
             <el-button type="danger" @click="deleteFun">删除</el-button>
-          </span> -->
+          </span> 
           <span class="operate_wrap">
             <!-- <el-button class="batchBtn" type="text" @click="addImport">
               <span style="font-size:14px">账单导入</span>
@@ -37,23 +37,118 @@
           </span>
         </div>
         <div class="table_list">
-          <el-table ref="multipleTable" :data="tableData" border tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
-            <el-table-column label="滞纳金" prop="late_fee" width="100">
-            </el-table-column>
-            <el-table-column label="其他费用" prop="other_fee" width="100">
-            </el-table-column>
-            <el-table-column label="服务费" prop="service_fee" width="100">
-            </el-table-column>
-            <el-table-column label="社保公积金企业小计" prop="company_total" width="150">
-            </el-table-column>
-            <el-table-column label="社保公积金个人小计" prop="person_total" width="150">
-            </el-table-column>
-            <el-table-column label="总合计(含服务费)" prop="total" width="150">
-            </el-table-column>
-            <el-table-column label="备注" prop="remark">
-            </el-table-column>
-
-          </el-table>
+        <el-table  :data="tableData" border tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="50" fixed="left">
+          </el-table-column>
+          <el-table-column label="供应商本期账单月" width="150" property="current_billing_month">
+          </el-table-column>
+          <el-table-column label="供应商" width="120" property="supplier_name">
+          </el-table-column>
+          <el-table-column label="姓名" width="100" property="user_name">
+          </el-table-column>
+          <el-table-column label="身份证" width="120" property="id_number">
+            <template slot-scope="scope">
+              <el-popover placement="top" title="" width="180" trigger="hover">
+                <span>{{scope.row.id_number}}</span>
+                <span slot="reference">{{scope.row.id_number.substr(0,3)+"****"+scope.row.id_number.substr(15)}}</span>
+              </el-popover>
+            </template>
+          </el-table-column>
+          <el-table-column label="缴费月份" width="100">
+            <template scope="scope">{{ scope.row.month_date }}</template>
+          </el-table-column>
+          <el-table-column label="SaaS项目" width="240">
+            <template scope="scope">{{ scope.row.project_name + ' / ' +  scope.row.saas_project_id}}</template>
+          </el-table-column>
+          <el-table-column label="参保城市" width="100">
+            <template scope="scope">{{ scope.row.insurance_city_name }}</template>
+          </el-table-column>
+          <el-table-column label="参保档位" width="110">
+            <template scope="scope">{{ scope.row.insurance_rank }}</template>
+          </el-table-column>
+          <el-table-column label="养老总额" width="110">
+            <template scope="scope">{{ scope.row.endowment_total }}</template>
+          </el-table-column>
+          <el-table-column label="养老企业" width="110">
+            <template scope="scope">
+              {{ scope.row.enterprise_endowment }}
+            </template>
+          </el-table-column>
+          <el-table-column label="养老个人" width="110">
+            <template scope="scope">{{ scope.row.personal_endowment }}</template>
+          </el-table-column>
+          <el-table-column label="医疗总额" width="110">
+            <template scope="scope">{{ scope.row.medicare_total }}</template>
+          </el-table-column>
+          <el-table-column label="医疗企业" width="110">
+            <template scope="scope">{{ scope.row.enterprise_medicare }}</template>
+          </el-table-column>
+          <el-table-column label="医疗个人" width="110">
+            <template scope="scope">{{ scope.row.personal_medicare }}</template>
+          </el-table-column>
+          <el-table-column label="失业总额" width="110">
+            <template scope="scope">{{ scope.row.unemployment_total }}</template>
+          </el-table-column>
+          <el-table-column label="失业企业" width="110">
+            <template scope="scope">{{ scope.row.enterprise_unemployment }}</template>
+          </el-table-column>
+          <el-table-column label="失业个人" width="110">
+            <template scope="scope">{{ scope.row.personal_unemployment }}</template>
+          </el-table-column>
+          <el-table-column label="工伤企业" width="110">
+            <template scope="scope">{{ scope.row.enterprise_work_injury }}</template>
+          </el-table-column>
+          <el-table-column label="生育企业" width="110">
+            <template scope="scope">{{ scope.row.enterprise_maternity }}</template>
+          </el-table-column>
+          <el-table-column label="大病总额" width="110">
+            <template scope="scope">{{ scope.row.big_risk_total }}</template>
+          </el-table-column>
+          <el-table-column label="大病企业" width="110">
+            <template scope="scope">{{ scope.row.enterprise_big_risk }}</template>
+          </el-table-column>
+          <el-table-column label="大病个人" width="110">
+            <template scope="scope">{{ scope.row.personal_big_risk }}</template>
+          </el-table-column>
+          <el-table-column label="公积金总额" width="120">
+            <template scope="scope">{{ scope.row.provident_fund_total }}</template>
+          </el-table-column>
+          <el-table-column label="公积金企业" width="120">
+            <template scope="scope">{{ scope.row.enterprise_provident_fund }}</template>
+          </el-table-column>
+          <el-table-column label="公积金个人" width="120">
+            <template scope="scope">{{ scope.row.personal_provident_fund }}</template>
+          </el-table-column>
+          <el-table-column label="残保金企业" width="120">
+            <template scope="scope">{{ scope.row.enterprise_residual }}</template>
+          </el-table-column>
+          <el-table-column label="滞纳金" width="120">
+            <template scope="scope">{{ scope.row.late_fee }}</template>
+          </el-table-column>
+          <el-table-column label="其他费用" width="120">
+            <template scope="scope">{{ scope.row.other_money }}</template>
+          </el-table-column>
+          <el-table-column label="服务费" width="120">
+            <template scope="scope">{{ scope.row.social_security_service_money }}</template>
+          </el-table-column>
+          <el-table-column label="社保公积金企业小计" width="160">
+            <template scope="scope">{{ scope.row.enterprise_total }}</template>
+          </el-table-column>
+          <el-table-column label="社保公积金个人小计" width="160">
+            <template scope="scope">{{ scope.row.personal_total }}</template>
+          </el-table-column>
+          <el-table-column label="总合计（含服务费）" width="160">
+            <template scope="scope">{{ scope.row.social_security_toal_money }}</template>
+          </el-table-column>
+          <!-- <el-table-column label="第三方增值税" width="120">
+            <template scope="scope">{{ scope.row.added_tax_money }}</template>
+          </el-table-column> -->
+          <el-table-column label="备注" width="280">
+            <template scope="scope">
+              <span>{{scope.row.remark}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
           <!--分页-->
           <div class="pagination">
             <el-pagination background @current-change="handleCurrentPageChange" :current-page.sync="page_no" :page-size="page_size" layout="total, prev, pager, next" :total="total_num">
@@ -121,6 +216,8 @@
         this.getUserinfo()
         this.team_id = util.getLocalStorage('projectStorageInfo').team_id
         this.project_id = util.getLocalStorage('projectStorageInfo').project_id
+        //从url参数中获取ssas_id
+        this.ssas_id = this.$route.query.ssas_id
         // console.log('this.team_id===', this.team_id)
         // console.log('this.project_id===', this.project_id)
         this.getList()
@@ -160,9 +257,10 @@
           saas_project_id: this.project_id,
           supplier_name: this.formInline.supplier_name,
           user_info: this.formInline.user,
+          ssas_id:this.ssas_id
         };
         util.ajax({
-          url: '/fulltimess/social_security_bill',
+          url: '/ss/accountstatement/details/list',
           data: currParams,
           type: 'POST',
           success: (res) => {
@@ -190,11 +288,9 @@
           }
         })
       },
-      handleSelectionChange(val) {
-        this.selectedArr = val
-      },
+
       deleteFun() {
-        if (this.selectedArr.length === 0) {
+        if (this.multipleSelection.length === 0) {
           this.$message({
             showClose: true,
             message: '删除前请先勾选列表项',
@@ -202,16 +298,31 @@
           });
           return;
         }
-        const prepay_ids = [];
-        this.selectedArr.forEach(item => {
-          prepay_ids.push(item.id)
-        })
+        const ssas_id = [];
+        this.multipleSelection.forEach(item => {
+            ssas_id.push(item.ssas_id)
+        });
+
+        this.$confirm('确定删除选中的账单吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }).then(() => {
+          this.deleteRequest(ssas_id)
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+
+      deleteRequest(ssas_id) {
         const currParams = {
-          prepay_ids: prepay_ids.join(','),
-          user_name: this.userInfo.name
+          ssas_id: ssas_id.join(','),
         };
         util.ajax({
-          url: '/fulltimess/social_security_bill/delete',
+          url: '/ss/accountstatement/details/del',
           data: currParams,
           type: 'POST',
           success: (res) => {

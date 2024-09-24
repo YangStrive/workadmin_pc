@@ -51,7 +51,8 @@ export default {
 
   },
   mounted() {
-    this.project_id = util.getLocalStorage('projectStorageInfo').project_id
+    this.project_id = util.getLocalStorage('projectStorageInfo').project_id;
+    console.log(this.$route.query.tab)
     if(this.$route.query.tab){
       const tab = this.$route.query.tab
       this.activeName = tab

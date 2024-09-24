@@ -22,20 +22,14 @@
         <span>
           <el-button type="primary" @click="handleClickCreateRecon">创建对账单</el-button>
         </span>
-        <span class="operate_wrap">
-          <el-button class="batchBtn" type="text" @click="dialogAddS = true">
-            <span style="font-size:14px">添加</span>
-          </el-button>
-        </span>
       </div>
       <div class="table">
         <el-table
           :data="tableData"
           border
-          @cell-click="gotoMemberInfoList"
           style="width: 100%">
           <!--月份、缴纳人数、项目名、企业合计、个人合计、服务费合计、总计、状态-->
-          <el-table-column prop="moth" label="月份" />
+          <el-table-column prop="month" label="月份" />
           <el-table-column prop="count" label="缴纳人数" />statementDetails
           <el-table-column prop="saas_project_name" label="项目名" />
           <el-table-column prop="enterprise_toal_money" label="企业合计" />
@@ -44,14 +38,17 @@
           <el-table-column prop="total_money" label="总计" />
           <el-table-column prop="status" label="状态" >
             <template slot-scope="scope">
-              <span v-if="scope.row.status == 0">未对账</span>
-              <span v-if="scope.row.status == 1">已对账</span>
+              <el-tag  v-if="scope.row.status == 0" type="info">待生成</el-tag>
+              <el-tag  v-if="scope.row.status == 1" type="info">生成中</el-tag>
+              <el-tag  v-if="scope.row.status == 2" type="success">已生成</el-tag>
+              <el-tag  v-if="scope.row.status == 3" type="warning">已锁定</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="150">
             <template slot-scope="scope">
-              <el-button type="text" @click="handleClickUnlock(scope.row.id)" v-if="scope.row.status == 3">解锁</el-button>
-              <el-button type="text" @click="handleClickLock(scope.row.id)" v-if="scope.row.status == 2">锁定</el-button>
+              <el-button type="text" @click="handleClickUnlock(scope.row.id,$event)" v-if="scope.row.status == 3">解锁</el-button>
+              <el-button type="text" @click="handleClickLock(scope.row.id,$event)" v-if="scope.row.status == 2">锁定</el-button>
+              <el-button type="text" @click="gotoMemberInfoList(scope.row)" >详情</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -73,28 +70,18 @@
   <!--添加社保 弹层-->
     <div class="dialog-adds">
       <el-dialog
-        title="请选择缴纳月份"
+        title="请选月份"
         :visible.sync="dialogAddS"
         @close="resetForm('ruleForm')">
           <div>
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="60px" class="demo-ruleForm">
-              <el-form-item 
-                label="年：" 
-                prop="year" 
-                style="margin-bottom:20px;">
-                <el-date-picker
-                  v-model="ruleForm.year"
-                  @change="selectYear"
-                  type="year"
-                  style="width:300px;"
-                  placeholder="选择年">
-                </el-date-picker>
-              </el-form-item>
-              <el-form-item label="月：" prop="month">
-                <el-select v-model="ruleForm.month" placeholder="选择月" style="width:300px;">
-                  <el-option :label="i.label" :value="i.value" :key="i.value" :disabled="i.disabled" v-for="i in montharr2"></el-option>
-                </el-select>
-              </el-form-item>
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
+            <el-form-item label="月份：" prop="month" >
+              <el-date-picker
+                v-model="ruleForm.month"
+                type="month"
+                placeholder="选择月">
+              </el-date-picker>
+            </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer footerdiv">
               <el-button @click="resetForm('ruleForm')">取 消</el-button>
@@ -123,7 +110,6 @@ export default {
         },
         tableData:[],
         ruleForm:{
-          year:'',
           month:'',
         },
         montharr:[
@@ -142,11 +128,8 @@ export default {
         ],
         montharr2:[],
         rules: {
-          year: [
-           {type: 'date', required: true, message: '请选择缴纳年份', trigger: 'change'}
-          ],
           month: [
-            { required: true, message: '请选择缴纳月份', trigger: 'change' }
+            { required: true, message: '请选择月份', trigger: 'blur',type:'date' }
           ]
         },
         page_no:1,
@@ -165,16 +148,48 @@ export default {
     	},
       //去往社保详情列表页
       gotoMemberInfoList(row){
-        util.setLocalStorage('currUserInfoData',row)
-        this.$router.replace({ path: 'ssDetails', query: {type:'details'}})
+        //util.setLocalStorage('currUserInfoData',row)
+        this.$router.push({ path: 'StatementDetails', query: {ssas_id: row.id}})
       },
       // 创建提交
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            util.getLocalStorage('currUserInfoData','')
-            let time = util.getLocalTime(this.ruleForm.year,'yyyy')
-            this.$router.replace({ path: 'ssDetails', query: { year: time,month:this.ruleForm.month,type:'creat'}})
+            ///ss/accountstatement/make
+            util.ajax({
+              url:'/ss/accountstatement/make',
+              type:'POST',
+              data:{
+                team_id: this.team_id,
+                project_id: this.project_id,
+                month: util.getLocalTime(this.ruleForm.month,'yyyy-MM'),
+                is_save: 1,
+              },
+              timeout:10000,
+              success:(obj) => {
+                if(obj && obj.errno == 0){
+                  this.$message({
+                    showClose: true,
+                    message: '创建成功',
+                    type: 'success'
+                  });
+                  this.dialogAddS = false
+                  this.getSSList()
+                }else{
+                  this.$message({
+                    showClose: true,
+                    message: obj.errmsg,
+                    type: 'warning'
+                  });
+                }
+              },   
+              error: (xhr, status) => {
+                
+              },
+              noNetwork: () => {
+                //网络超时
+              }
+            })
           } else {
             // console.log('error submit!!');
             return false;
@@ -190,46 +205,15 @@ export default {
         this.page_no = val
         this.getSSList()
       },
-      selectYear(){
-        this.montharr = [
-          {label:'01',value:'01'},
-          {label:'02',value:'02'},
-          {label:'03',value:'03'},
-          {label:'04',value:'04'},
-          {label:'05',value:'05'},
-          {label:'06',value:'06'},
-          {label:'07',value:'07'},
-          {label:'08',value:'08'},
-          {label:'09',value:'09'},
-          {label:'10',value:'10'},
-          {label:'11',value:'11'},
-          {label:'12',value:'12'}
-        ]
-        this.montharr2 = []
-        this.ruleForm.month = ''
-        let time = util.getLocalTime(this.ruleForm.year,'yyyy')
-        this.exist_year_month.forEach( (o) => {
-          if(time == o.year){
-            this.montharr.forEach( (m) => {
-              o.month_list.forEach( (i) => {
-                if(m.value == i){
-                  m.disabled = true
-                }
-              })
-            })
-          }else{
-            this.montharr2 = this.montharr
-          }
-        })
-        this.montharr2 = this.montharr
-      },
+
+
       getSSList(pre){
         let time = ''
         if(pre){
           this.page_no = 1
           if(this.form.month){
             time = util.getLocalTime(this.form.month,'yyyy-MM')
-            time = time.replace('-','')
+            time = time+'-01'
           }else{
             time = ''
           }
@@ -252,8 +236,7 @@ export default {
               if(obj && obj.errno == 0){
                   this.tableData = obj.data.list
                   this.total_num = obj.data.total_num
-                  this.total_page = obj.data.total_page
-                  this.exist_year_month = obj.data.exist_year_month                
+                  this.total_page = obj.data.total_page            
               }else{
                 this.$message({
                     showClose: true,
@@ -271,7 +254,8 @@ export default {
         })
       },
 
-      handleClickLock(ssas_id){
+      handleClickLock(ssas_id,ev){
+        ev.stopPropagation()
         this.$confirm('是否锁定该对账单？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -312,7 +296,8 @@ export default {
         });
       },
 
-      handleClickUnlock(ssas_id){
+      handleClickUnlock(ssas_id,ev){
+        ev.stopPropagation()
         this.$confirm('是否解锁该对账单？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -352,6 +337,12 @@ export default {
         }).catch(() => {        
         });
       },
+
+      handleClickCreateRecon(){
+        this.dialogAddS = true
+        this.ruleForm.year = ''
+        this.ruleForm.month = ''
+      }
   	},
   	mounted() {
     	this.init()

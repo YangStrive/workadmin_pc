@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <div class="dialog-import">
-      <el-dialog :title="dialogTitle" :visible.sync="dialogImport" @close="cancelImport('ruleForm')" size="tiny">
+      <el-dialog :title="dialogTitle" :visible.sync="dialogImport" @close="cancelImport('ruleForm')" size="small">
         <div style="">
           <div style="fontSize:14px;width:100%;marginBottom:15px">
             <!-- <p class="formTips">只能上传1个Excel类型文件</p> -->
@@ -101,6 +101,7 @@ export default {
       insert_sum: 0,
       error_sum: 0,
       errtableData: [],
+      
     }
   },
   computed: {

@@ -274,3 +274,6 @@
 ::-webkit-scrollbar-corner{
 	background: #179a16;
 }
+.el-dialog__wrapper .dialog-addS{
+	width: 400px;
+  }

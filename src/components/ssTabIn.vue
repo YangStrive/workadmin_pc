@@ -294,7 +294,7 @@
         </div>
     </el-dialog>
     <!-- 新增导入 -->
-    <ssImpot ref="importRef" :dialogTitle="'新增导入'" :tempHref="searchData.batch_add_ss" :requestUrl="requestUrl_add" :resultUrl="resultUrl_add" @updateListFun="updateListFun"></ssImpot>
+    <ssImpot ref="importRef" :dialogTitle="'批量导入'" :tempHref="searchData.batch_add_ss" :requestUrl="requestUrl_add" :resultUrl="resultUrl_add" @updateListFun="updateListFun"></ssImpot>
     <!-- 批量减员 -->
     <ssImpot ref="importReduceRef" :dialogTitle="'批量减员'" :tempHref="searchData.batch_reduce_ss" :resultUrl="resultUrl_reduce" :requestUrl="requestUrl_reduce" @updateListFun="updateListFun"></ssImpot>
     <!-- 导出名单 -->

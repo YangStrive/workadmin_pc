@@ -298,9 +298,10 @@
           });
           return;
         }
-        const ssas_id = [];
+        let details_id = [];
+        let ssas_id = this.multipleSelection[0].ssas_id;
         this.multipleSelection.forEach(item => {
-            ssas_id.push(item.ssas_id)
+            details_id.push(item.id)
         });
 
         this.$confirm('确定删除选中的账单吗?', '提示', {
@@ -308,7 +309,7 @@
           cancelButtonText: '取消',
           type: 'warning',
         }).then(() => {
-          this.deleteRequest(ssas_id)
+          this.deleteRequest(ssas_id,details_id)
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -317,16 +318,17 @@
         });
       },
 
-      deleteRequest(ssas_id) {
+      deleteRequest(ssas_id,details_id) {
         const currParams = {
-          ssas_id: ssas_id.join(','),
+          ssas_id,
+          details_id,
         };
         util.ajax({
           url: '/ss/accountstatement/details/del',
           data: currParams,
           type: 'POST',
           success: (res) => {
-            if (res.errno == 0) {
+            if (res.result) {
               this.$message({
                 message: '删除成功',
                 type: "success",

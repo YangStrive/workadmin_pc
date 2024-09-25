@@ -223,6 +223,9 @@ export default {
       if(this.dialogTitle == '批量减员') {
         currParams.type = 2
       }
+      if(this.dialogTitle == '批量导入') {
+        currParams.type = 6
+      }
       util.ajax({
         url: this.resultUrl,
         type: 'GET',
